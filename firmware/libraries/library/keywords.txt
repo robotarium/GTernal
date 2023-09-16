@@ -1,0 +1,33 @@
+GritsbotX	KEYWORD1
+SETUP	KEYWORD2
+
+readIR	KEYWORD2
+enableIR	KEYWORD2
+disableIR	KEYWORD2
+
+setGlobalPosition	KEYWORD2
+getGlobalPosition	KEYWORD2
+
+convertUnicycleToRightMotor	KEYWORD2
+convertUnicycleToLeftMotor	KEYWORD2
+
+getEncoderCounts	KEYWORD2
+checkCharging	KEYWORD2
+checkBattVoltage	KEYWORD2
+encoderPositionUpdate	KEYWORD2
+
+moveL	KEYWORD2
+moveR	KEYWORD2
+
+brake	KEYWORD2
+noMotion	KEYWORD2
+PIDMotorControl	KEYWORD2
+
+rainbow	KEYWORD2
+setSingleLED	KEYWORD2
+setAllLED	KEYWORD2
+turnOffLED	KEYWORD2
+
+jsonSerialRead	KEYWORD2
+followCommands	KEYWORD2
+communicationCheck	KEYWORD2

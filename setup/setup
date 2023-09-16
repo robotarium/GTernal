@@ -1,0 +1,65 @@
+#!/bin/sh
+
+DEL="-------"
+FIN="DONE"
+
+print_start() {
+	echo "$DEL ""$1"" $DEL"
+}
+
+print_end() {
+	echo "$DEL ""$FIN ""$1"" $DEL"	
+}
+
+STR="DISABLING WIFI POWER MANAGEMENT"
+print_start "$STR"
+echo '#!/bin/sh' >> turn_off_wifi_power
+echo '/sbin/iw dev wlan0 set power_save off' >> turn_off_wifi_power
+chmod +x turn_off_wifi_power
+sudo mv turn_off_wifi_power /etc/network/if-up.d/
+print_end "$STR"
+
+STR="DISABLING UNUSED SERVICES"
+print_start "$STR"
+sudo apt-get purge -y --remove plymouth
+sudo systemctl disable triggerhappy.service
+sudo systemctl disable hciuart.service
+sudo systemctl disable keyboard-setup.service
+sudo systemctl disable dphys-swapfile.service
+print_end "$STR"
+
+STR="INSTALLING DOCKER"
+print_start "$STR"
+sudo apt-get remove docker docker-engine docker.io
+curl -fsSL get.docker.com -o get-docker.sh && export VERSION=23.0 && sh get-docker.sh
+sudo usermod -aG docker pi
+print_end "$STR"
+
+STR="INSTALLING PYTHON AND DEPS"
+print_start "$STR"
+sudo apt-get install -y python3-pip git
+sudo python3 -m pip install pyserial
+print_end "$STR"
+
+STR="CLONING GIT REPOS"
+git config --global credential.helper store
+print_start "$STR"
+cd /home/pi
+mkdir git
+cd git
+git clone https://github.com/skim743/gritsbot_3
+git clone https://github.com/robotarium/mac_discovery
+print_end "$STR"
+
+STR="STARTING CONTAINERS"
+print_start "$STR"
+cd /home/pi/git/gritsbot_3/docker
+sudo ./docker_run.sh
+sudo ./docker_watch.sh
+cd /home/pi/git/mac_discovery/docker
+sudo ./docker_run.sh
+print_end "$STR"
+
+# Delete me
+rm $0
+

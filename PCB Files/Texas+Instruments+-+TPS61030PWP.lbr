@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eagle SYSTEM "eagle.dtd">
+<eagle version="9.7.0">
+<drawing>
+<settings>
+<setting alwaysvectorfont="no"/>
+<setting keepoldvectorfont="yes"/>
+<setting verticaltext="up"/>
+</settings>
+<grid distance="50" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="5" altunitdist="mil" altunit="mil"/>
+<layers>
+<layer number="1" name="Top" blackcolor="0xccc90d0c" whitecolor="0xccc90d0c" coloredcolor="0xccc90d0c" blackhighlight="0xccff0000" whitehighlight="0xb4ff0000" coloredhighlight="0xb4ff0000" fill="1" visible="yes" active="yes"/>
+<layer number="16" name="Bottom" blackcolor="0xccc90d0c" whitecolor="0xccc90d0c" coloredcolor="0xccc90d0c" blackhighlight="0xccff0000" whitehighlight="0xb4ff0000" coloredhighlight="0xb4ff0000" fill="1" visible="yes" active="yes"/>
+<layer number="21" name="tPlace" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="22" name="bPlace" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="25" name="tNames" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="26" name="bNames" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="27" name="tValues" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="28" name="bValues" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="29" name="tStop" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="30" name="bStop" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="31" name="tCream" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="32" name="bCream" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="39" name="tKeepout" blackcolor="0xccc90d0c" whitecolor="0xccc90d0c" coloredcolor="0xccc90d0c" blackhighlight="0xccff0000" whitehighlight="0xb4ff0000" coloredhighlight="0xb4ff0000" fill="1" visible="yes" active="yes"/>
+<layer number="40" name="bKeepout" blackcolor="0xccc90d0c" whitecolor="0xccc90d0c" coloredcolor="0xccc90d0c" blackhighlight="0xccff0000" whitehighlight="0xb4ff0000" coloredhighlight="0xb4ff0000" fill="1" visible="yes" active="yes"/>
+<layer number="41" name="tRestrict" blackcolor="0xff000000" whitecolor="0xffffffff" coloredcolor="0xfff6f4d2" blackhighlight="0xb4282828" whitehighlight="0xb4282828" coloredhighlight="0xb4282828" fill="1" visible="yes" active="yes"/>
+<layer number="42" name="bRestrict" blackcolor="0xff000000" whitecolor="0xffffffff" coloredcolor="0xfff6f4d2" blackhighlight="0xb4282828" whitehighlight="0xb4282828" coloredhighlight="0xb4282828" fill="1" visible="yes" active="yes"/>
+<layer number="51" name="tDocu" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="52" name="bDocu" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="91" name="Nets" blackcolor="0xcc3ddc97" whitecolor="0xcc0dab76" coloredcolor="0xcc0dab76" blackhighlight="0xb400ff00" whitehighlight="0xb400ff00" coloredhighlight="0xb400ff00" fill="1" visible="yes" active="yes"/>
+<layer number="92" name="Busses" blackcolor="0xcc0696d7" whitecolor="0xcc0696d7" coloredcolor="0xcc0696d7" blackhighlight="0xb40000ff" whitehighlight="0xcc8252c2" coloredhighlight="0xcc8252c2" fill="1" visible="yes" active="yes"/>
+<layer number="93" name="Pins" blackcolor="0xcc3ddc97" whitecolor="0xcc0dab76" coloredcolor="0xcc0dab76" blackhighlight="0xb400ff00" whitehighlight="0xb400ff00" coloredhighlight="0xb400ff00" fill="1" visible="yes" active="yes"/>
+<layer number="94" name="Symbols" blackcolor="0xccc90d0c" whitecolor="0xccc90d0c" coloredcolor="0xccc90d0c" blackhighlight="0xccff0000" whitehighlight="0xb4ff0000" coloredhighlight="0xb4ff0000" fill="1" visible="yes" active="yes"/>
+<layer number="95" name="Names" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="96" name="Values" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="97" name="Info" blackcolor="0xccc8c8c8" whitecolor="0xbb808080" coloredcolor="0xbb808080" blackhighlight="0xccafd134" whitehighlight="0xccafd134" coloredhighlight="0xccafd134" fill="1" visible="yes" active="yes"/>
+<layer number="98" name="Guide" blackcolor="0xccc8c832" whitecolor="0xbbc8c832" coloredcolor="0xbbc8c832" blackhighlight="0xccffcd07" whitehighlight="0xccffcd07" coloredhighlight="0xccffcd07" fill="1" visible="yes" active="yes"/>
+</layers>
+<library>
+<description>Upverter Parts Library
+
+Created by Upverter.com</description>
+<packages>
+<package name="TEXAS_INSTRUMENTS_TPS61030PWP_0">
+<description>Boost Switching Regulator IC Positive Adjustable 1.8V 1 Output 3.6A (Switch) 16-TSSOP (0.173", 4.40mm Width) Exposed Pad</description>
+<wire x1="-2.5" y1="-2.2" x2="-2.5" y2="2.2" width="0.15" layer="51"/>
+<wire x1="-2.5" y1="2.2" x2="2.5" y2="2.2" width="0.15" layer="51"/>
+<wire x1="2.5" y1="2.2" x2="2.5" y2="-2.2" width="0.15" layer="51"/>
+<wire x1="2.5" y1="-2.2" x2="-2.5" y2="-2.2" width="0.15" layer="51"/>
+<wire x1="-2.8" y1="-3.7" x2="-2.8" y2="3.7" width="0.1" layer="39"/>
+<wire x1="-2.8" y1="3.7" x2="2.8" y2="3.7" width="0.1" layer="39"/>
+<wire x1="2.8" y1="3.7" x2="2.8" y2="-3.7" width="0.1" layer="39"/>
+<wire x1="2.8" y1="-3.7" x2="-2.8" y2="-3.7" width="0.1" layer="39"/>
+<wire x1="-2.9" y1="2.2" x2="-2.9" y2="-2.2" width="0.15" layer="21"/>
+<wire x1="2.9" y1="2.2" x2="2.9" y2="-2.2" width="0.15" layer="21"/>
+<text x="-2.675" y="4.025" size="1" layer="25">&gt;NAME</text>
+<circle x="-2.275" y="-4.175" radius="0.25" width="0" layer="21"/>
+<pad name="PAD_1" x="-1.5" y="0.75" drill="0.33" diameter="0.63" thermals="no"/>
+<pad name="PAD_2" x="0" y="0.75" drill="0.33" diameter="0.63" thermals="no"/>
+<pad name="PAD_3" x="1.5" y="0.75" drill="0.33" diameter="0.63" thermals="no"/>
+<pad name="PAD_4" x="-1.5" y="-0.75" drill="0.33" diameter="0.63" thermals="no"/>
+<pad name="PAD_5" x="0" y="-0.75" drill="0.33" diameter="0.63" thermals="no"/>
+<pad name="PAD_6" x="1.5" y="-0.75" drill="0.33" diameter="0.63" thermals="no"/>
+<smd name="1" x="-2.275" y="-2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="2" x="-1.625" y="-2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="3" x="-0.975" y="-2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="4" x="-0.325" y="-2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="5" x="0.325" y="-2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="6" x="0.975" y="-2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="7" x="1.625" y="-2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="8" x="2.275" y="-2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="9" x="2.275" y="2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="10" x="1.625" y="2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="11" x="0.975" y="2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="12" x="0.325" y="2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="13" x="-0.325" y="2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="14" x="-0.975" y="2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="15" x="-1.625" y="2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="16" x="-2.275" y="2.8" dx="0.3" dy="1.6" layer="1"/>
+<smd name="17" x="0" y="0" dx="5" dy="3.4" layer="1"/>
+</package>
+</packages>
+<symbols>
+<symbol name="TEXAS_INSTRUMENTS_TPS61030PWP_0_0">
+<description>Boost Switching Regulator IC Positive Adjustable 1.8V 1 Output 3.6A (Switch) 16-TSSOP (0.173", 4.40mm Width) Exposed Pad</description>
+<wire x1="2.54" y1="-40.64" x2="2.54" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="2.54" y1="-5.08" x2="30.48" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="30.48" y1="-5.08" x2="30.48" y2="-40.64" width="0.254" layer="94"/>
+<wire x1="30.48" y1="-40.64" x2="2.54" y2="-40.64" width="0.254" layer="94"/>
+<text x="2.54" y="-2.54" size="2.54" layer="95" align="top-left">&gt;NAME</text>
+<text x="2.54" y="-45.72" size="2.54" layer="95" align="top-left">TPS61030PWP</text>
+<pin name="1_SW" x="-2.54" y="-7.62" length="middle"/>
+<pin name="2_SW" x="-2.54" y="-10.16" length="middle"/>
+<pin name="1_VOUT" x="35.56" y="-7.62" length="middle" rot="R180"/>
+<pin name="2_VOUT" x="35.56" y="-10.16" length="middle" rot="R180"/>
+<pin name="3_VOUT" x="35.56" y="-12.7" length="middle" rot="R180"/>
+<pin name="EN" x="-2.54" y="-20.32" length="middle"/>
+<pin name="FB" x="35.56" y="-17.78" length="middle" rot="R180"/>
+<pin name="LBI" x="-2.54" y="-25.4" length="middle"/>
+<pin name="LBO" x="35.56" y="-22.86" length="middle" rot="R180"/>
+<pin name="NC" x="-2.54" y="-38.1" length="middle"/>
+<pin name="SYNC" x="-2.54" y="-30.48" length="middle"/>
+<pin name="VBAT" x="-2.54" y="-15.24" length="middle"/>
+<pin name="GND" x="35.56" y="-27.94" length="middle" rot="R180"/>
+<pin name="1_PGND" x="35.56" y="-30.48" length="middle" rot="R180"/>
+<pin name="2_PGND" x="35.56" y="-33.02" length="middle" rot="R180"/>
+<pin name="3_PGND" x="35.56" y="-35.56" length="middle" rot="R180"/>
+<pin name="PGND_PAD" x="35.56" y="-38.1" length="middle" rot="R180"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="TEXAS_INSTRUMENTS_TPS61030PWP" prefix="U">
+<description>Boost Switching Regulator IC Positive Adjustable 1.8V 1 Output 3.6A (Switch) 16-TSSOP (0.173", 4.40mm Width) Exposed Pad</description>
+<gates>
+<gate name="G$0" symbol="TEXAS_INSTRUMENTS_TPS61030PWP_0_0" x="0" y="0"/>
+</gates>
+<devices>
+<device name="TEXAS_INSTRUMENTS_TPS61030PWP_0_0" package="TEXAS_INSTRUMENTS_TPS61030PWP_0">
+<connects>
+<connect gate="G$0" pin="1_PGND" pad="3"/>
+<connect gate="G$0" pin="1_SW" pad="1"/>
+<connect gate="G$0" pin="1_VOUT" pad="13"/>
+<connect gate="G$0" pin="2_PGND" pad="4"/>
+<connect gate="G$0" pin="2_SW" pad="2"/>
+<connect gate="G$0" pin="2_VOUT" pad="14"/>
+<connect gate="G$0" pin="3_PGND" pad="5"/>
+<connect gate="G$0" pin="3_VOUT" pad="15"/>
+<connect gate="G$0" pin="EN" pad="9"/>
+<connect gate="G$0" pin="FB" pad="12"/>
+<connect gate="G$0" pin="GND" pad="11"/>
+<connect gate="G$0" pin="LBI" pad="7"/>
+<connect gate="G$0" pin="LBO" pad="10"/>
+<connect gate="G$0" pin="NC" pad="16"/>
+<connect gate="G$0" pin="PGND_PAD" pad="17 PAD_1 PAD_2 PAD_3 PAD_4 PAD_5 PAD_6"/>
+<connect gate="G$0" pin="SYNC" pad="8"/>
+<connect gate="G$0" pin="VBAT" pad="6"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="CENTROID_NOT_SPECIFIED" value="No"/>
+<attribute name="CURRENT_-_OUTPUT" value="3.6A (Switch)"/>
+<attribute name="DATASHEET" value="http://www.ti.com/lit/gpn/tps61030"/>
+<attribute name="DIGIKEY_DESCRIPTION" value="IC Boost Switching Regulator IC Positive Adjustable 1.8V 1 Output 3.6A (Switch) 16-TSSOP (0.173&quot;, 4.40mm Width) Exposed Pad"/>
+<attribute name="DIGIKEY_PART_NUMBER" value="296-27006-5-ND"/>
+<attribute name="FREQUENCY_-_SWITCHING" value="600kHz"/>
+<attribute name="FUNCTION" value="Step-Up"/>
+<attribute name="LEAD_FREE" value="yes"/>
+<attribute name="MF" value="Texas Instruments"/>
+<attribute name="MFG_PACKAGE_IDENT" value="PWP (R-PDSO-G16)"/>
+<attribute name="MOUSER_PART_NUMBER" value="595-TPS61030PWP"/>
+<attribute name="MPN" value="TPS61030PWP"/>
+<attribute name="OUTPUT_TYPE" value="Adjustable"/>
+<attribute name="PACKAGE" value="HTSSOP16"/>
+<attribute name="PREFIX" value="U"/>
+<attribute name="ROHS" value="yes"/>
+<attribute name="TEMPERATURE_RANGE_HIGH" value="+85°C"/>
+<attribute name="TEMPERATURE_RANGE_LOW" value="-40°C"/>
+<attribute name="VOLTAGE" value=""/>
+<attribute name="VOLTAGE_-_INPUT_(MAX)" value="5.5V"/>
+<attribute name="VOLTAGE_-_INPUT_(MIN)" value="1.8V"/>
+<attribute name="VOLTAGE_-_OUTPUT_(MAX)" value="5.5V"/>
+<attribute name="VOLTAGE_-_OUTPUT_(MIN/FIXED)" value="1.8V"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
+</drawing>
+</eagle>
