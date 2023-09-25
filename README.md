@@ -1,9 +1,9 @@
 # Setup Process for GTernal
 
 # 1 - Program Teensy
-1. Connect a Teensy to the main computer using a micro-USB cable. 
-2. Open Arduino IDE (by either entering 'arduino' on a terminal or clicking 'Show Applications' icon on the bottom left corner of the screen)
-3. Open 'defaultOperation.ino' located in '~/git/gritsbotx/firmware/teensyCode' directory.
+1. Install Teensyduino (https://www.pjrc.com/teensy/td_download.html)
+2. Connect a Teensy to the computer using a micro-USB cable.
+3. Run Teensyduino and open 'defaultOperation.ino' located in 'GTernal/firmware/defaultOperation' directory.
 4. Click the upload icon (right arrow icon).
 
 # 2 - Make the Base Image for Raspberry Pi
@@ -12,7 +12,7 @@ This section details how to make the base image.  Relatively few changes are mad
 
 ## 1 - Load the RPi image onto an SD card
 1. Install and run the Raspberry Pi Imager (https://www.raspberrypi.com/software/).
-2. For 'Operating System,' select 'Raspberry Pi OS (other)' and select 'Raspberry Pi OS Lite (64-bit).'
+2. For 'Operating System,' select 'Raspberry Pi OS (other)' and select 'Raspberry Pi OS Lite (64-bit).' For Raspberry Pi Zero 1s, select 'Raspberry Pi OS Lite (32-bit)'
 3. For 'Storage,' choose the SD card to be used.
 4. Before clicking the 'WRITE' button, click on the gear icon below the 'WRTIE' button to open the 'Advanced options.'
 5. Check 'Enable SSH' and 'Use password authentication.'
@@ -20,23 +20,10 @@ This section details how to make the base image.  Relatively few changes are mad
 7. Next, check 'Configure wireless LAN' and enter 'SSID' and 'Password' for the router.
 8. Change 'Wireless LAN country' to 'US.' Click 'SAVE' and click 'WRITE' button to start loading the image to the SD card.
 
-## 2 - Register the RPi as a Robot
-Assign an unallocated robot index for the MAC address of the Raspberry Pi. Then, on the main computer,
-1. Add/Replace the MAC address of the Raspberry Pi in '~/git/gritsbot_3/config/mac_list.json'
-2. Add/Replace the robot ID in '~/git/vicon_tracker_python/config/node_desc_tracker.json'
-3. Add/Replace the robot ID in '~/git/robotarium_matlab_backend/config/node_desc_api.json'
-4. Build the firmware Docker image by running
-```
-cd ~/git/gritsbot_3/docker/
-./docker_build.sh 192.168.1.8 1884
-```
-- When making making multiple robots, register the MAC address of all new robots in the files listed above before building the firmware image. Otherwise, the firmware needs to be built as many as the number of new robots.
-- When assigning an index to a new robot,  assign the number engraved on the Vicon hat plate. Make sure not to use any numbers that are assigned to existing robots. For more information about generating Vicon hats, see https://github.com/skim743/gritsbotx_vicon_hats
-
-## 3 - Setup the RPi
+## 2 - Setup the RPi
 1. Eject the card from the computer and insert it onto a Raspberry Pi and power it up.
 It should automatically connect to the wifi. The Pi needs some time to boot for the first time. The boot up process can be visually inspected by plugging the Raspberry Pi to a monitor through a mini HDMI cable. When the Pi completes the booting process it will prompt a login. If the Pi shows a blue screen prompting to enter a new username, something is wrong with uploading the image to Pi, and the Raspbian OS needs to be reinstalled. Before loading another image to the SD card, make sure to re-type the passwords for the Pi and the Wifi. The Raspberry Pi Imager seems to be ruining the passwords saved in the advanced setting when the program is restarted.
-2. Navigate to the router settings page by navigating to '192.168.1.1' using a web browser (admin credential for the router is currently saved in Firefox). The new Pi will appear as 'RASPBERRYPI.' 
+2. Navigate to the router settings page by navigating to '192.168.1.1' or '10.0.0.1' using a web browser. The new Pi will appear as 'RASPBERRYPI.' 
 3. Click on it to look up its IP address and MAC address. 
 4. After looking up the IP address of the new Pi, ssh to it by
 ```
@@ -57,33 +44,44 @@ sudo nano /boot/config.txt
 dtoverlay=pi3-disable-bt
 ```
 
+## 3 - Register the RPi as a Robot
+Assign an unallocated robot index for the MAC address of the Raspberry Pi. Then, on the main computer,
+1. Add/Replace the MAC address of the Raspberry Pi in 'GTernal/config/mac_list.json'
+2. Add/Replace the robot ID in 'vicon_tracker_python/config/node_desc_tracker.json' f
+3. Add/Replace the robot ID in '~/git/robotarium_matlab_backend/config/node_desc_api.json'
+4. Build the firmware Docker image by running
+```
+cd /path-to-the-parent-directory/GTernal/docker/
+./docker_build.sh 192.168.1.8 1884
+```
+- When making making multiple robots, register the MAC address of all new robots in the files listed above before building the firmware image. Otherwise, the firmware needs to be built as many as the number of new robots.
+- When assigning an index to a new robot, assign the number engraved on the Vicon hat plate. Make sure not to use any numbers that are already assigned to other robots. For more information about generating Vicon hats, see https://github.com/skim743/gritsbotx_vicon_hats
+
 # 3 - Automated Setup
 
 This section assumes that you have built a base image as previously detailed.
 
 ## 1 - Automatic Installation
 
-1. Copy '.git-credentials' in '\~/git/gritsbot_3/docker' directory and 'setup' in '\~/git/gritsbot_3/setup' directory to 'rootfs/home/pi' directory of the SD card.
+1. Connect the Pi and Teensy with through UART. If the Pi is not connected with a programmed Teensy as instructed in Step 1, the firmware will not be started by the setup script successfully in the next step.
 
-2. Connect the Pi and Teensy with a USB cable. If the Pi is not connected with a programmed Teensy as instructed in Step 1, the firmware will not successfully be started by the setup script in the next step.
-
-3. On the Pi, run the setup script with
+2. On the Pi, run the setup script with
 
 ```
 ./setup
 ```
 
-This can be done either by directly on the Pi by connecting a mini HDMI cable and a keyboard to the Pi or SSHing to the Pi as instructed in Step 2.3.
+This can be done either by directly on the Pi by connecting a mini HDMI cable and a keyboard to the Pi or SSHing to the Pi as instructed in Step 2.4.
 
 ## 2 - Network Host Name Change
-This process changes the name of the Raspberry Pi on the network. This helps to identify each robot easily on the router page (192.168.1.1). See Step 2.3, if you forgot how to access the router page.
+This process changes the name of the Raspberry Pi on the network. This helps to identify each robot easily on the router page (192.168.1.1). See Step 2.2, if you forgot how to access the router page.
 
 After the setup script is completed,
 Run
 ```
 sudo raspi-config
 ```
-on the Raspberry Pi, and change the Host Name to 'robot#' where # is the new robot index assigned to the Pi in Step 2.3.
+on the Raspberry Pi, and change the Host Name to 'robot#' where # is the new robot index assigned to the Pi in Step 3.
 
 Reboot the Pi to apply the new network host name by selecting 'yes' when the raspi-config asks for a restart, or by using
 ```
@@ -101,7 +99,7 @@ and 'Yes' for 'Would you like the serial port hardware to be enabled?'
 
 # 4 - Manual Installation
 
-This section details the installation process for the firmware.  This process can be made automatic via the setup scripts.
+This section details the manual installation process for the firmware. This process is unnecessary if the automatic setup in the previous section is performed.
 
 ### 1 Remove Unused Services
 
