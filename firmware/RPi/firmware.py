@@ -1,4 +1,4 @@
-import gritsbot.gritsbotserial as gritsbotserial
+import RPi.gritsbotserial as gritsbotserial
 import json
 import vizier.node as node
 import time
