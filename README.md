@@ -68,7 +68,7 @@ This section assumes that you have built a base image as previously detailed.
 2. On the Pi, run the setup script with
 
 ```
-./setup
+sudo ./setup
 ```
 
 This can be done either by directly on the Pi by connecting a mini HDMI cable and a keyboard to the Pi or SSHing to the Pi as instructed in Step 2.4.
