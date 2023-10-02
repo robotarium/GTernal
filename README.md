@@ -47,7 +47,7 @@ dtoverlay=pi3-disable-bt
 ## 3 - Register the RPi as a Robot
 Assign an unallocated robot index for the MAC address of the Raspberry Pi. Then, on the main computer,
 1. Add/Replace the MAC address of the Raspberry Pi in 'GTernal/config/mac_list.json'
-2. Add/Replace the robot ID in 'vicon_tracker_python/config/node_desc_tracker.json' f
+2. Add/Replace the robot ID in 'vicon_tracker_python/config/node_desc_tracker.json'
 3. Add/Replace the robot ID in '~/git/robotarium_matlab_backend/config/node_desc_api.json'
 4. Build the firmware Docker image by running
 ```
