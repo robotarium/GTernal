@@ -28,6 +28,12 @@ sudo systemctl disable keyboard-setup.service
 sudo systemctl disable dphys-swapfile.service
 print_end "$STR"
 
+# Date and time needs to be updated to properly install Docker
+STR="SYNCHRONIZING DATE AND TIME"
+print_start "$STR"
+sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+print_end "$STR"
+
 STR="INSTALLING DOCKER"
 print_start "$STR"
 sudo apt-get remove docker docker-engine docker.io
