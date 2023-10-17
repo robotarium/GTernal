@@ -16,13 +16,3 @@ RUN cd vizier && python3 -m pip install .
 # Install firmware
 COPY . /GTernal
 RUN cd GTernal && python3 -m pip install .
-
-# ARG ROBO_HOST
-# ARG ROBO_PORT
-
-# ENV ROBO_HOST ${ROBO_HOST}
-# ENV ROBO_PORT ${ROBO_PORT}
-
-# # Has to be in this format!  Docker doesn't like to interpret the env variables properly in JSON form
-# ENTRYPOINT python3 GTernal/firmware/RPi/pi_firmware.py -host ${ROBO_HOST} -port ${ROBO_PORT} GTernal/config/mac_list.json
-# CMD [ ]
