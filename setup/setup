@@ -84,4 +84,3 @@ print_end "$STR"
 STR="Rebooting to apply settings"
 print_start "$STR"
 sudo reboot
-print_end "$STR"
