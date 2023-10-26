@@ -10,8 +10,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('mac_list', help='Path to JSON file containing MAC to ID mapping')
     parser.add_argument('interface', help='Network interface on which to make query')
+    parser.add_argument('command', help='Command for sshpass')
     parser.add_argument('-c', help='Optional command for address', default=None)
     parser.add_argument('-n', help='Optional number of robots needed to be found', default=None)
+    parser.add_argument('-d', help='Optional directory for address', default='')
+    parser.add_argument('-f', help='Optional file to copy to the address', default='')
 
     args = parser.parse_args()
     interface = args.interface
@@ -60,21 +63,34 @@ def main():
             print('Number of robots needed, provided by user: ', args.n)
             print('All robots not found, retrying...') 
 
-    if(args.c is None):
+    if(args.command is None):
         return
 
     print('Enter secrets for robots')
     password = getpass.getpass()
-    # -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
-    # Else, send command to robots
-    cmds = [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, args.c] for x in id_to_ip.values()]
-    #cmds = [['sshpass', '-p', password, 'scp', '-o', 'StrictHostKeyChecking=no', '/home/robotarium-workstation/restart_docker.sh', 'pi@'+x+':~'] for x in id_to_ip.values()]
+    if args.command == 'ssh':
+        cmds = [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, args.c] for x in id_to_ip.values()]
+    elif args.command == 'scp':
+        cmds = [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', args.f, 'pi@'+x+':'+args.d] for x in id_to_ip.values()]
+    # cmds = [['sshpass', '-p', password, ' '.join(filter(None, [args.command, args.f])), '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x+args.d, args.c] for x in id_to_ip.values()]
+
     pids = []
     for cmd in cmds:
         pids.append(subprocess.Popen(cmd))
 
     for pid in pids:
         pid.communicate()
+
+    # For running the setup script
+    if args.command == 'scp':
+        cmds = [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo ./setup'] for x in id_to_ip.values()]
+
+        pids = []
+        for cmd in cmds:
+            pids.append(subprocess.Popen(cmd))
+
+        for pid in pids:
+            pid.communicate()
 
 
 if __name__ == '__main__':

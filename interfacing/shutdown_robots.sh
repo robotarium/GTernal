@@ -3,4 +3,4 @@ if [[ $1 -eq 0 ]] ; then
     exit 0
 fi
 
-sudo python3 get_ip_by_mac.py ../config/mac_list.json enp3s0 -c "sudo shutdown now" -n $1
+sudo python3 get_ip_by_mac.py ../config/mac_list.json en0 ssh -c "sudo shutdown now" -n $1

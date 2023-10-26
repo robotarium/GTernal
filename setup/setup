@@ -28,6 +28,16 @@ sudo systemctl disable keyboard-setup.service
 sudo systemctl disable dphys-swapfile.service
 print_end "$STR"
 
+STR="Disabling Bluetooth"
+print_start "$STR"
+sudo echo "dtoverlay=disable-bt" >> /boot/config.txt
+print_end "$STR"
+
+STR="Enabling UART Serial"
+print_start "$STR"
+sudo raspi-config nonint do_serial 2
+print_end "$STR"
+
 # Date and time needs to be updated to properly install Docker
 STR="SYNCHRONIZING DATE AND TIME"
 print_start "$STR"
@@ -66,6 +76,12 @@ cd /home/pi/git/mac_discovery/docker
 sudo ./docker_run.sh
 print_end "$STR"
 
-# Delete me
-rm $0
+STR="Removing the setup script"
+print_start "$STR"
+rm /home/pi/setup
+print_end "$STR"
 
+STR="Rebooting to apply settings"
+print_start "$STR"
+sudo reboot
+print_end "$STR"
