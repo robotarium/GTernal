@@ -72,7 +72,11 @@ def main():
         cmds = [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, args.c] for x in id_to_ip.values()]
     elif args.command == 'scp':
         cmds = [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', args.f, 'pi@'+x+':'+args.d] for x in id_to_ip.values()]
-    # cmds = [['sshpass', '-p', password, ' '.join(filter(None, [args.command, args.f])), '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x+args.d, args.c] for x in id_to_ip.values()]
+    elif args.command == 'setup'
+        cmds = [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../setup/setup', 'pi@'+x+':/home/pi'] for x in id_to_ip.values()]
+        _ = cmds.append(['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo ./setup']) for x in id_to_ip.values()
+        _ = cmds.append(['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../config/mac_list.json', 'pi@'+x+':/home/pi/git/GTernal/config']) for x in id_to_ip.values()
+        _ = cmds.append(['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../docker/docker_run.sh', 'pi@'+x+':/home/pi/git/GTernal/docker']) for x in id_to_ip.values()
 
     pids = []
     for cmd in cmds:
@@ -81,16 +85,19 @@ def main():
     for pid in pids:
         pid.communicate()
 
-    # For running the setup script
-    if args.command == 'scp':
-        cmds = [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo ./setup'] for x in id_to_ip.values()]
+    # # For running the setup script
+    # if args.f == '../setup/setup':
+    #     cmds = [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo ./setup'] for x in id_to_ip.values()]
 
-        pids = []
-        for cmd in cmds:
-            pids.append(subprocess.Popen(cmd))
+    #     pids = []
+    #     for cmd in cmds:
+    #         pids.append(subprocess.Popen(cmd))
 
-        for pid in pids:
-            pid.communicate()
+    #     for pid in pids:
+    #         pid.communicate()
+    
+    # elif args.f == '../config/mac_list.json':
+    #     cmds = [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo reboot'] for x in id_to_ip.values()]
 
 
 if __name__ == '__main__':
