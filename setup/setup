@@ -81,13 +81,14 @@ print_end "$STR"
 STR="SETTING UP NETWORK HOST NAME"
 print_start "$STR"
 cd /home/pi/git/GTernal/setup
-robot_id=$(sudo python3 check_hostname.py ../config/mac_list.json)
-sudo raspi-config nonint do_hostname robot_id
+robot_id=$(python3 check_hostname.py ../config/mac_list.json)
+sudo raspi-config nonint do_hostname $robot_id
 print_end "$STR"
 
 STR="REMOVING SETUP SCRIPT"
 print_start "$STR"
 rm /home/pi/setup
+rm /home/pi/get-docker.sh
 print_end "$STR"
 
 # STR="REBOOTING TO APPLY SETTINGS"
