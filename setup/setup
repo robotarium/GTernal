@@ -55,6 +55,7 @@ STR="INSTALLING PYTHON AND DEPS"
 print_start "$STR"
 sudo apt-get install -y python3-pip git
 sudo python3 -m pip install pyserial
+sudo python3 -m pip install netifaces
 print_end "$STR"
 
 STR="CLONING GIT REPOS"
@@ -79,7 +80,8 @@ print_end "$STR"
 STR="SETTING UP NETWORK HOST NAME"
 print_start "$STR"
 cd /home/pi/git/GTernal/setup
-sudo python3 set_hostname.py
+robot_id=$(sudo python3 check_hostname.py ../config/mac_list.json)
+sudo raspi-config nonint do_hostname robot_id
 print_end "$STR"
 
 STR="REMOVING SETUP SCRIPT"
@@ -87,6 +89,6 @@ print_start "$STR"
 rm /home/pi/setup
 print_end "$STR"
 
-STR="REBOOTING TO APPLY SETTINGS"
-print_start "$STR"
-sudo reboot
+# STR="REBOOTING TO APPLY SETTINGS"
+# print_start "$STR"
+# sudo reboot

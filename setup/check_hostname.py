@@ -39,14 +39,7 @@ def main():
 
     if(mac_address in mac_list):
         robot_id = mac_list[mac_address]
-        cmds = ['sudo', 'raspi-config', 'nonint', 'do_hostname', 'GTernal'+robot_id]
-
-        pids = []
-        for cmd in cmds:
-            pids.append(subprocess.Popen(cmd))
-
-        for pid in pids:
-            pid.communicate()
+        print('GTernal'+robot_id)
     else:
         print('MAC address {} not in supplied MAC list file'.format(mac_address))
         raise ValueError()
