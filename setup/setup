@@ -63,6 +63,7 @@ git config --global credential.helper store
 print_start "$STR"
 cd /home/pi
 mkdir git
+sudo chown pi:pi git
 cd git
 git clone https://github.com/robotarium/GTernal
 git clone https://github.com/robotarium/mac_discovery
