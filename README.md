@@ -75,7 +75,9 @@ This section assumes that:
 2. You have fully assembled robots.
     > [!NOTE]
     > Check if the Pi and Teensy are connected through UART. If the Pi is not connected with a programmed Teensy as instructed in Step 1, the firmware will not be started by the setup script properly in the following steps.
-
+3. Only the new robots to be setup are connected to the WiFi.
+    > [!IMPORTANT]
+    > The current automatic setup script looks for all robots with the MAC addresses specified in 'GTernal/config/mac_list.json' file and starts the setup process for the robots. Therefore, it will start the setup process even for the robots already with the firmware installed if they are connected to the WiFi. Since this may cause problems for the existing robots, t is recommended to only turn on the new robots to be set up.
 <!-- ## 1 - Repository Setup
 During the setup process, each robot runs an automatic setup script which clones the firmware from a GitHub repository. By default, the setup script clones the official GTernal repository. This needs to be changed to clone your repository with updated configuration files.
 
@@ -84,6 +86,8 @@ If you are not familiar with Git or GitHub, please refer to here: https://docs.g
 2.  -->
 
 ## 1 - Automatic Installation
+> [!IMPORTANT]
+> It is recommended to only turn on the new robots to be set up. The current automatic setup script looks for all robots with the MAC addresses specified in 'GTernal/config/mac_list.json' file and starts the setup process for the robots. Therefore, it will start the setup process even for the robots already with the firmware installed if they are connected to the WiFi. Since this may cause problems for the existing robots, it is recommended to only turn on the new robots that need to be set up.
 1. Insert the loaded micro-SD cards to the robots' Raspberry Pis and power the robots up using the switch on each PCB. They should automatically connect to the wifi specified in Step 2.7. The Pi needs some time to boot for the first time.
 
 2. On your computer, check if all the Raspberry Pis are connected to the WiFi router by running
