@@ -56,7 +56,7 @@ sudo nano /boot/config.txt
 dtoverlay=pi3-disable-bt
 ``` -->
 
-## 3 - Register an RPi as a Robot
+<!-- ## 3 - Register an RPi as a Robot
 Assign an unallocated robot index for the MAC address of a Raspberry Pi. Then, on your computer,
 1. Add/Replace the MAC address of the Raspberry Pi in 'GTernal/config/mac_list.json'
 <!-- 2. Add/Replace the robot ID in 'vicon_tracker_python/config/node_desc_tracker.json'
@@ -67,7 +67,7 @@ Assign an unallocated robot index for the MAC address of a Raspberry Pi. Then, o
 ```
 e.g. ./docker_build.sh 192.168.1.8 1884
 - When making making multiple robots, register the MAC address of all new robots in the files listed above before building the firmware image. Otherwise, the firmware needs to be built as many as the number of new robots.
-- When assigning an index to a new robot, assign the number engraved on the Vicon hat plate. Make sure not to use any numbers that are already assigned to other robots. For more information about generating Vicon hats, see https://github.com/skim743/gritsbotx_vicon_hats
+- When assigning an index to a new robot, assign the number engraved on the Vicon hat plate. Make sure not to use any numbers that are already assigned to other robots. For more information about generating Vicon hats, see https://github.com/skim743/gritsbotx_vicon_hats -->
 
 # 3 - Load the Raspberry Pi with the Default firmware
 This section assumes that:
