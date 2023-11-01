@@ -87,36 +87,36 @@ If you are not familiar with Git or GitHub, please refer to here: https://docs.g
 1. Insert the loaded micro-SD cards to the robots' Raspberry Pis and power the robots up using the switch on each PCB. They should automatically connect to the wifi specified in Step 2.7. The Pi needs some time to boot for the first time.
 
 2. On your computer, check if all the Raspberry Pis are connected to the WiFi router by running
-```
-sudo arp-scan -I <network-device-name> -l -t 100 -r 5
-```
-e.g. sudo arp-scan -I enp4s0 -l -t 100 -r 5
+    ```
+    sudo arp-scan -I <network-device-name> -l -t 100 -r 5
+    ```
+    e.g., sudo arp-scan -I enp4s0 -l -t 100 -r 5
 
-Check if the number of Raspberry Pis found by the above command matches the total number of Raspberry Pis being set up. Wait a few more minutes and check again if not all robots show up in the list.
+    Check if the number of Raspberry Pis found by the above command matches the total number of Raspberry Pis being set up. Wait a few more minutes and check again if not all robots show up in the list.
 
-> [!NOTE]
-> The network-device-name can be found by running 'ifconfig' command into the terminal. There may be multiple network devices on your computer. The right device is the one connected to the same WiFi network as the Raspberry Pis. Typically, the local IP address assigned by a network router is '192.168.x.x' or '10.0.x.x.'
+    > [!NOTE]
+    > The network-device-name can be found by running 'ifconfig' command into the terminal. There may be multiple network devices on your computer. The right device is the one connected to the same WiFi network as the Raspberry Pis. Typically, the local IP address assigned by a network router is '192.168.x.x' or '10.0.x.x.'
 
 3. Assign an unallocated robot ID# for the MAC address of a Raspberry Pi found in the previous step. Then, add/replace the robot ID# and the MAC address of the Raspberry Pi in 'GTernal/config/mac_list.json'
 
-> [!NOTE]
-> When assigning an index to a new robot, assign an Aruco tag ID or the ID engraved on a Vicon hat plate. Make sure not to use any numbers that are already assigned to other robots. For more information about generating Vicon hats, see https://github.com/skim743/gritsbotx_vicon_hats
+    > [!NOTE]
+    > When assigning an index to a new robot, assign an Aruco tag ID or the ID engraved on a Vicon hat plate. Make sure not to use any numbers that are already assigned to other robots. For more information about generating Vicon hats, see https://github.com/skim743/gritsbotx_vicon_hats
 
 4. Replace lines 12 and 13 in 'GTernal/docker/docker_run.sh' with the IP address and port of the MQTT host.
 
-> [!NOTE]
-> The default GTernal firmware requires an MQTT broker. For more information about the MQTT broker, please refer to https://github.com/robotarium/mqtt_broker.
+    > [!NOTE]
+    > The default GTernal firmware requires an MQTT broker. For more information about the MQTT broker, please refer to https://github.com/robotarium/mqtt_broker.
 
 5. Start the setup process by running
-```
-cd path-to-parent-directory/GTernal/interfacing
-./setup.sh <#-of-robots-being-set-up>
-```
-e.g. ./setup.sh 10
+    ```
+    cd path-to-parent-directory/GTernal/interfacing
+    ./setup.sh <#-of-robots-being-set-up>
+    ```
+    e.g., ./setup.sh 10
 
-When prompted 'Enter secrets for robots,' enter the password for the Raspberry Pis, 'raspberry'
+    When prompted 'Enter secrets for robots,' enter the password for the Raspberry Pis, 'raspberry'
 
-The robots will reboot after the setup process.
+    The robots will reboot after the setup process.
 
 <!-- 5. Update the 'mac_list.json' file on the robots by running
 ```
