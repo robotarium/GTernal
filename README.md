@@ -149,7 +149,7 @@ Reboot the Pi to apply the new network host name by selecting 'yes' when the ras
 sudo reboot
 ``` -->
 
-## 4 - Manual Installation
+## 2 - Manual Installation
 
 This section details the manual installation process for the firmware. This process is unnecessary if the automatic setup in the previous section is performed.
 
