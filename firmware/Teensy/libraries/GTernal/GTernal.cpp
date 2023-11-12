@@ -33,6 +33,10 @@ void GTernal::SETUP(){
   pinMode(_LMotor1, OUTPUT); 
   pinMode(_LMotor2, OUTPUT);
 
+  //RPi Enable Pin
+  pinMode(_rpiEnable, OUTPUT);
+  digitalWrite(_rpiEnable, LOW);
+
   ///////////////////////////////////////////////////////////
   // Neo Pixel Setup
   ///////////////////////////////////////////////////////////
@@ -140,15 +144,18 @@ void GTernal::jsonSerialRead(){
           }  
           else if (strcmp(ifaceStr,"bus_volt") == 0){
             statusArray.add(1);
-            body["bus_volt"] = ina260.readBusVoltage();
+            // body["bus_volt"] = ina260.readBusVoltage();
+            body["bus_volt"] = filteredMeasurement(20, "voltage");
           }
           else if (strcmp(ifaceStr,"bus_current") == 0){
             statusArray.add(1);
-            body["bus_current"] = ina260.readCurrent();
+            // body["bus_current"] = ina260.readCurrent();
+            body["bus_current"] = filteredMeasurement(20, "current");
           }
           else if (strcmp(ifaceStr,"power") == 0){
             statusArray.add(1);
-            body["power"] = ina260.readPower();
+            // body["power"] = ina260.readPower();
+            body["power"] = filteredMeasurement(20, "power");
           } 
           break;
         }
@@ -170,6 +177,11 @@ void GTernal::jsonSerialRead(){
             statusArray.add(1);
             JsonArray& _rightLED = jsonIn["body"][i]["rgb"];//Right LED RGB value
             setSingleLED(0,_rightLED[0],_rightLED[1],_rightLED[2]);
+          }
+          else if (strcmp(ifaceStr,"fast_charge") == 0){
+            Serial.println("Entering fast charging mode"); // For debugging
+            statusArray.add(1);
+            setFastChargingFlag(1);
           }
 
           _communicationTimeout = millis();
@@ -540,4 +552,91 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
 
       _PIDMotorsTimeStart = millis();
     }
+}
+
+///////////////////////////////////////////////////////////
+//Fast Charging Mode
+///////////////////////////////////////////////////////////
+void GTernal::setFastChargingFlag(bool flag){
+  _flagFastCharging = flag;
+
+  if (_flagFastCharging){
+    resetVoltageArray();
+    setSingleLED(0,127,30,0);
+  }
+  else{
+    turnOffLED(); // Turn off the Neopixel indicator
+  }
+}
+
+bool GTernal::isFastCharging(){
+  return _flagFastCharging;
+}
+
+float GTernal::avgVoltage(float voltNew){
+  float sumArray = 0;
+  float avgArray;
+  int sizeArray = sizeof(_battVoltArray) / sizeof(float);
+
+  _battVoltArray[_battVoltArrayIndx] = voltNew; // Update an element in the array with a new measurement
+  for (int i = 0; i < sizeArray; i++){
+    sumArray = sumArray + _battVoltArray[i];
+  }
+  avgArray = sumArray/sizeArray;
+
+  _battVoltArrayIndx++;
+  if (_battVoltArrayIndx >= sizeArray){
+    _battVoltArrayIndx = 0;
+  }
+  
+  return avgArray;
+}
+
+void GTernal::resetVoltageArray(){
+  int sizeArray = sizeof(_battVoltArray) / sizeof(float);
+  for (int i = 0; i < sizeArray; i++){
+    _battVoltArray[i] = 0;
+  }
+  _voltUpdateTime = millis();
+}
+
+void GTernal::monitorBattVolt(){
+  if (millis() - _voltUpdateTime >= 1000){ // 1 second interval
+    float avgBattVolt = avgVoltage(ina260.readBusVoltage());
+    _voltUpdateTime = millis();
+    Serial.println(avgBattVolt); // For debugging
+    
+    if (avgBattVolt > _battVoltThreshold){ // Check if the 30 second average battery voltage is higher than the threshold voltage (mV)
+      setFastChargingFlag(0); // Clear the fast charging flag
+
+      // Wake up the Raspberry Pi
+      digitalWrite(_rpiEnable, HIGH);
+      delay(100);
+      digitalWrite(_rpiEnable, LOW);
+    }
+  }
+}
+
+float GTernal::filteredMeasurement(int nSamples, char data[]){
+  float sumArray = 0;
+
+  if (strcmp(data, "voltage") == 0){
+    for (int i = 0; i < nSamples; i++){
+      sumArray = sumArray + ina260.readBusVoltage();
+    }
+  }
+  else if (strcmp(data, "current") == 0){
+    for (int i = 0; i < nSamples; i++){
+      sumArray = sumArray + ina260.readCurrent();
+    }
+  }
+  else if (strcmp(data, "power") == 0){
+    for (int i = 0; i < nSamples; i++){
+      sumArray = sumArray + ina260.readPower();
+    }
+  }
+  
+  float avgValue = sumArray/nSamples;
+
+  return avgValue;
 }

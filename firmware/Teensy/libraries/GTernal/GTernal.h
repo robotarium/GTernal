@@ -49,6 +49,13 @@ class GTernal
 
     void PIDMotorControl(float desLVelInput, float desRVelInput); //PID Controller to Keep Wheels Rotating at Proper Speed
 
+    void setFastChargingFlag(bool flag); // Fast charging flag
+    bool isFastCharging(); // Returns if the robot is in fast charging mode or not
+    float avgVoltage(float voltNew); // Returns 30 seconds average battery voltage
+    void resetVoltageArray(); // Resets the voltage array for 30 seconds average battery voltage
+    void monitorBattVolt();
+    float filteredMeasurement(int nSamples, char data[]);
+
   private:
 
     ///////////////////////////////////////////////////////////
@@ -59,6 +66,7 @@ class GTernal
     static constexpr float _motorGearRatio = 100.37; // The gearing ratio of the drive motor being used.
     static constexpr float _wheelDiameter = 0.032; // Wheel Diameter in cm.
     static constexpr float _axelLength = 0.105; // Axel length in cm.
+    static constexpr float _battVoltThreshold = 4000.0; // Threshold battery voltage (mV) for turning turning the RPi on when in fast charging mode
 
     ///////////////////////////////////////////////////////////
     //Pin Numbers Here
@@ -89,6 +97,10 @@ class GTernal
 
     static constexpr uint8_t _battVoltage = A8;// A8 // Analog battery voltage measurement
     static constexpr uint8_t _battChargingCheck = 13;// D13 // Digital battery charging check
+
+    //RPi enable pin
+
+    static constexpr uint8_t _rpiEnable = 9;// D13 // Digital battery charging check
 
     ///////////////////////////////////////////////////////////
     //Functions
@@ -213,6 +225,14 @@ class GTernal
     float _botA; //Robot current global orientation
 
     float _botA0;//Storage for last heading of robot used in encoderPositionUpdate Fucntion  
+
+    ///////////////////////////////////////////////////////////
+    //Fast Charging Mode
+    ///////////////////////////////////////////////////////////
+    bool _flagFastCharging = 0;
+    float _battVoltArray[30];
+    int _battVoltArrayIndx = 0;
+    unsigned long _voltUpdateTime;
 
     ///////////////////////////////////////////////////////////
     //Useful Functions
