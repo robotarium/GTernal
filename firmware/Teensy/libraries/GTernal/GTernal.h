@@ -6,12 +6,19 @@
 #include "ArduinoJson.h"
 #include "Adafruit_NeoPixel.h"
 #include <Adafruit_INA260.h>
-
+#include <Adafruit_BNO055.h>
+#include <vl53l4cd_class.h>
+#include <Wire.h>
+#include <string>
+#include <array>
+using namespace std;
 
 class GTernal
 {
   public:
     GTernal();
+    static GTernal* _instance; //Singleton Instance
+    void beginISR();
 
     ///////////////////////////////////////////////////////////
     //Functions
@@ -22,15 +29,20 @@ class GTernal
     float convertUnicycleToRightMotor(float vel, float w); // Unicycle Model Conversions
     float convertUnicycleToLeftMotor(float vel, float w); // Unicycle Model Conversions
 
-    void setSingleLED(int pos, int r, int g, int b); // Set a single Neo Pixel's color.
-    void setAllLED(int r, int g, int b); // Set both Neo Pixels to the same color.
+    void setSingleLED(int pos, int r, int g, int b, int w); // Set a single Neo Pixel's color.
+    void setAllLED(int r, int g, int b, int w); // Set both Neo Pixels to the same color.
     void turnOffLED(); // Turn off Neo Pixels.
     void rainbow(uint8_t wait); // Display a rainbow effect on the LED (CAUTION: INCLUDES A DELAY)
 
     void getEncoderCounts(int encoderData[]); // Read and store the encoders tick counts in the argument array [Left, Right]
+    void getWheelSpeeds(float wheelSpeeds[]); // Read and store the wheel speeds in the argument array [Left, Right]
+    void readWheelSpeeds(); // Read and store the wheel speeds in the private variables _wheelSpeedL, _wheelSpeedR
     bool checkCharging(); // Returns true if the battery is currently charging
     float checkBattVoltage(); // Reads and returns the current battery voltage
 
+    void measureDistances(JsonArray& array); // Read and store the sensor distances in the json array passed into the function
+    void getOrientation(JsonArray& oriArray); // Read and store the orientation data in the json array passed into the function
+    
     void encoderPositionUpdate(float timeStep); //Encoders used for state estimates.
     void setGlobalPosition(float x, float y, float a); // Set the global state of the robot.
     void getGlobalPosition(float state[]); //Get the global state of the robot. [x,y,theta]
@@ -48,6 +60,7 @@ class GTernal
     void communicationCheck(float communicationTimeout);//Will stop the motors if no communication is received.
 
     void PIDMotorControl(float desLVelInput, float desRVelInput); //PID Controller to Keep Wheels Rotating at Proper Speed
+    void openLoopControl(float desLVelInput, float desRVelInput); //Open Loop Control to Keep Wheels Rotating at Proper Speed
 
     void setFastChargingFlag(bool flag); // Fast charging flag
     bool isFastCharging(); // Returns if the robot is in fast charging mode or not
@@ -56,7 +69,12 @@ class GTernal
     void monitorBattVolt();
     float filteredMeasurement(int nSamples, char data[]);
 
+    void setVelocity(float v, float w); // Set the desired velocity and angular velocity of the robot
+
+    
   private:
+    static IntervalTimer timerISR; //Timer for PID Motor Control
+    static void isrHandler(); //Interrupt Handler for PID Motor Control
 
     ///////////////////////////////////////////////////////////
     //Constants
@@ -140,6 +158,9 @@ class GTernal
     int _encoderCountL; // Left wheel encoder count.
     int _encoderCountR; // Right wheel encoder count.
 
+    volatile float _wheelSpeedL; // Left wheel speed in rad/s.
+    volatile float _wheelSpeedR; // Right wheel speed in rad/s.
+
 
     ///////////////////////////////////////////////////////////
     //IR Distance Conversion Constants
@@ -157,13 +178,15 @@ class GTernal
     ///////////////////////////////////////////////////////////
 
     float _PIDMotorsTimeStart;
+    float _encoderTimeStart;
     bool _driveStart;
-    float _v;
-    float _w;
+    bool _encoderStart;
+    volatile float _v;
+    volatile float _w;
 
-    static constexpr float _kpMotor = 1.00;// = 0.904;
-    static constexpr float _kiMotor = 0.1;// = 146;
-    static constexpr int _kdMotor = 0.00;// = 0;
+    static constexpr float _kpMotor = 6.0;// = 0.904;
+    static constexpr float _kiMotor = 3.0;// = 146;
+    static constexpr int _kdMotor = 0.3;// = 0;
     static constexpr float _motorDigitalK = 1;// = 0.544;
 
     int _motorL;//Left Motor Speed (Arduino PWM Units, int 0-255)

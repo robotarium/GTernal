@@ -2,9 +2,13 @@
 
 Adafruit_INA260 ina260 = Adafruit_INA260();
 
-GTernal::GTernal():_motorLeft(_interruptL1, _interruptL2),_motorRight(_interruptR1, _interruptR2), \
-_strip(2,10,NEO_GRB + NEO_KHZ800){
+// Initialize static members
+GTernal* GTernal::_instance = nullptr;
+IntervalTimer GTernal::timerISR;
 
+GTernal::GTernal():_motorLeft(_interruptL1, _interruptL2),_motorRight(_interruptR1, _interruptR2), \
+_strip(2,10,NEO_GRBW + NEO_KHZ800){
+  _instance = this; // Set the instance pointer to this object instance
 }
 
 ///////////////////////////////////////////////////////////
@@ -37,6 +41,7 @@ void GTernal::SETUP(){
   pinMode(_rpiEnable, OUTPUT);
   digitalWrite(_rpiEnable, LOW);
 
+
   ///////////////////////////////////////////////////////////
   // Neo Pixel Setup
   ///////////////////////////////////////////////////////////
@@ -60,6 +65,20 @@ void GTernal::SETUP(){
   _PIDMotorsTimeStart = millis();
   _positionUpdateTimeStart = millis();
   _communicationTimeout = millis();
+}
+
+///////////////////////////////////////////////////////////
+//Timer Interrupt Functions
+///////////////////////////////////////////////////////////
+
+void GTernal::beginISR(){
+  timerISR.begin(isrHandler, 10000); // 10000 us = 10 ms
+}
+
+void GTernal::isrHandler(){
+    if (_instance){
+      _instance -> followCommands();
+    }
 }
 
 ///////////////////////////////////////////////////////////
@@ -144,18 +163,18 @@ void GTernal::jsonSerialRead(){
           }  
           else if (strcmp(ifaceStr,"bus_volt") == 0){
             statusArray.add(1);
-            // body["bus_volt"] = ina260.readBusVoltage();
-            body["bus_volt"] = filteredMeasurement(20, "voltage");
+            body["bus_volt"] = ina260.readBusVoltage();
+            // body["bus_volt"] = filteredMeasurement(20, "voltage");
           }
           else if (strcmp(ifaceStr,"bus_current") == 0){
             statusArray.add(1);
-            // body["bus_current"] = ina260.readCurrent();
-            body["bus_current"] = filteredMeasurement(20, "current");
+            body["bus_current"] = ina260.readCurrent();
+            // body["bus_current"] = filteredMeasurement(20, "current");
           }
           else if (strcmp(ifaceStr,"power") == 0){
             statusArray.add(1);
-            // body["power"] = ina260.readPower();
-            body["power"] = filteredMeasurement(20, "power");
+            body["power"] = ina260.readPower();
+            // body["power"] = filteredMeasurement(20, "power");
           } 
           break;
         }
@@ -165,18 +184,20 @@ void GTernal::jsonSerialRead(){
           const char* ifaceStr = ifaceArray[i];
           if (strcmp(ifaceStr,"motor") == 0){
             statusArray.add(1);
+            noInterrupts(); // Critical section
             _v = jsonIn["body"][i]["v"];            
             _w = jsonIn["body"][i]["w"];
+            interrupts();
           }
           else if (strcmp(ifaceStr,"left_led") == 0){
             statusArray.add(1);
             JsonArray& _leftLED = jsonIn["body"][i]["rgb"];//Left LED RGB value
-            setSingleLED(1,_leftLED[0],_leftLED[1],_leftLED[2]);
+            setSingleLED(1,_leftLED[0],_leftLED[1],_leftLED[2],0);
           }
           else if (strcmp(ifaceStr,"right_led") == 0){
             statusArray.add(1);
             JsonArray& _rightLED = jsonIn["body"][i]["rgb"];//Right LED RGB value
-            setSingleLED(0,_rightLED[0],_rightLED[1],_rightLED[2]);
+            setSingleLED(0,_rightLED[0],_rightLED[1],_rightLED[2],0);
           }
           else if (strcmp(ifaceStr,"fast_charge") == 0){
             Serial.println("Entering fast charging mode"); // For debugging
@@ -202,36 +223,39 @@ void GTernal::jsonSerialRead(){
 void GTernal::communicationCheck(float communicationWaitTime){
   if (millis() - _communicationTimeout > communicationWaitTime){
     brake();
+    noInterrupts(); // Critical section
     _v=0;
     _w=0;
+    interrupts();
   }
 }
 
 void GTernal::followCommands(){
   if (_v == float(0) and _w == float(0)){
     noMotion();
-    return;
   }
-  PIDMotorControl(convertUnicycleToLeftMotor(_v,_w),convertUnicycleToRightMotor(_v,_w));
+  else{
+    PIDMotorControl(convertUnicycleToLeftMotor(_v,_w),convertUnicycleToRightMotor(_v,_w));
+  }
 }
 
 ///////////////////////////////////////////////////////////
 //Neo Pixel Functions
 ///////////////////////////////////////////////////////////
 
-void GTernal::setSingleLED(int pos, int r, int g, int b){
+void GTernal::setSingleLED(int pos, int r, int g, int b, int w){
   //Sets the color of one LED
   if (pos >= _strip.numPixels()){ // Controlling a non-existant LED (as defined in SETUP).
     return;
   } 
-  _strip.setPixelColor(pos, r, g, b);
+  _strip.setPixelColor(pos, r, g, b, w);
   _strip.show();
 }
 
-void GTernal::setAllLED(int r, int g, int b){
+void GTernal::setAllLED(int r, int g, int b, int w){
   //Sets the color of both LEDs
   for (int i = 0; i < _strip.numPixels(); i++){
-    _strip.setPixelColor(i, r, g, b);
+    _strip.setPixelColor(i, r, g, b, w);
   }
   _strip.show();
 }
@@ -239,7 +263,7 @@ void GTernal::setAllLED(int r, int g, int b){
 void GTernal::turnOffLED(){
   //Turns off both LEDs
   for (int i = 0; i < _strip.numPixels(); i++){
-    _strip.setPixelColor(i, 0, 0, 0);
+    _strip.setPixelColor(i, 0, 0, 0, 0);
   }
   _strip.show();
 }
@@ -249,10 +273,26 @@ void GTernal::rainbow(uint8_t wait) {
 
   for(j=0; j<256; j++) {
     for(i=0; i<_strip.numPixels(); i++) {
-      _strip.setPixelColor(i, _wheel((i+j) & 255));
+      // _strip.setPixelColor(i, _wheel((i+j) & 255));
+      _strip.setPixelColor(i, _wheel((i+j)));
     }
     _strip.show();
     delay(wait);
+  }
+
+  // Fade in and fade out the white LED on the Neopixel
+  for (int k = 0; k < 255; k++){
+    _strip.setPixelColor(0, 0, 0, 0, k);
+    // _strip.setPixelColor(1, 0, 0, 0, k);
+    _strip.show();
+    delay(wait/2);
+  }
+
+  for (int k = 255; k > 0; k--){
+    _strip.setPixelColor(0, 0, 0, 0, k);
+    // _strip.setPixelColor(1, 0, 0, 0, k);
+    _strip.show();
+    delay(wait/2);
   }
 }
 
@@ -261,14 +301,14 @@ void GTernal::rainbow(uint8_t wait) {
 uint32_t GTernal::_wheel(byte wheelPos) {
   wheelPos = 255 - wheelPos;
   if(wheelPos < 85) {
-    return _strip.Color(255 - wheelPos * 3, 0, wheelPos * 3);
+    return _strip.Color(255 - wheelPos * 3, 0, wheelPos * 3, 0);
   }
   if(wheelPos < 170) {
     wheelPos -= 85;
-    return _strip.Color(0, wheelPos * 3, 255 - wheelPos * 3);
+    return _strip.Color(0, wheelPos * 3, 255 - wheelPos * 3, 0);
   }
   wheelPos -= 170;
-  return _strip.Color(wheelPos * 3, 255 - wheelPos * 3, 0);
+  return _strip.Color(wheelPos * 3, 255 - wheelPos * 3, 0, 0);
 }
 
 ///////////////////////////////////////////////////////////
@@ -355,6 +395,14 @@ void GTernal::encoderPositionUpdate(float timeStep){
   }  
 }
 
+void GTernal::getWheelSpeeds(float wheelSpeeds[]){
+  //Returns the current wheel speeds of the robot [Left, Right].
+  noInterrupts(); // Critical section
+  wheelSpeeds[0] = _wheelSpeedL;
+  wheelSpeeds[1] = _wheelSpeedR;
+  interrupts();
+}
+
 ///////////////////////////////////////////////////////////
 //Motor Functions
 ///////////////////////////////////////////////////////////
@@ -435,6 +483,13 @@ void GTernal::moveL(int motorSpeed){
   analogWrite(_PWML, abs(motorSpeed));
 }
 
+void GTernal::setVelocity(float v, float w){
+  noInterrupts(); // Critical section
+  _v = v;
+  _w = w;
+  interrupts();
+}
+
 ///////////////////////////////////////////////////////////
 //Controllers
 ///////////////////////////////////////////////////////////
@@ -445,7 +500,7 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
     float timeStep = 10;
 
     //Prefilter
-    float a = 0.18;//Slightly tweaked to lower overshoot.
+    // float a = 0.18;//Slightly tweaked to lower overshoot.
 
     if(!_driveStart){//We recently stopped motion and didn't call the PID loop, reset the PID timers/variables.
       _driveStart = true;
@@ -465,11 +520,14 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
     }
 
     if (millis() - _PIDMotorsTimeStart >= timeStep){
-      _desVelR = (1-a)*_desVelR+a*desRVelInput;
-      _desVelL = (1-a)*_desVelL+a*desLVelInput;
-      float desLVel = _desVelL;
-      float desRVel = _desVelR;
-      float PIDTimeStep = (millis() - _PIDMotorsTimeStart)/1000;//Time step for controller to work on (s).
+      // _desVelR = (1-a)*_desVelR+a*desRVelInput;
+      // _desVelL = (1-a)*_desVelL+a*desLVelInput;
+      // float desLVel = _desVelL;
+      // float desRVel = _desVelR;
+      float desLVel = desLVelInput;
+      float desRVel = desRVelInput;
+      // float PIDTimeStep = (millis() - _PIDMotorsTimeStart)/1000;//Time step for controller to work on (s).
+      float PIDTimeStep = 0.01;
 
       _readEncoders();
       int countL = _encoderCountL;
@@ -496,12 +554,17 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
 
       _integralL = _integralL + errorL * PIDTimeStep;
       _integralR = _integralR + errorR * PIDTimeStep;
-      float diffL = (_oldErrorL - errorL) / PIDTimeStep;
-      float diffR = (_oldErrorR - errorR) / PIDTimeStep;
+      // float diffL = (_oldErrorL - errorL) / PIDTimeStep;
+      // float diffR = (_oldErrorR - errorR) / PIDTimeStep;
+      float diffL = (errorL - _oldErrorL) / PIDTimeStep;
+      float diffR = (errorR - _oldErrorR) / PIDTimeStep;
       _oldErrorL = errorL;
       _oldErrorR = errorR;
       _oldMotorPIDEncoderCountL = countL;
       _oldMotorPIDEncoderCountR = countR;
+
+      _wheelSpeedL = desLVel - errorL;
+      _wheelSpeedR = desRVel - errorR;
 
 
       //Get rid of integral windup with feedback loop.
@@ -562,7 +625,7 @@ void GTernal::setFastChargingFlag(bool flag){
 
   if (_flagFastCharging){
     resetVoltageArray();
-    setSingleLED(0,127,30,0);
+    setSingleLED(0,127,30,0,0);
   }
   else{
     turnOffLED(); // Turn off the Neopixel indicator
