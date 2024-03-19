@@ -5,8 +5,12 @@ GTernal myRobot;
 WDT_T4<WDT1> wdt;
 
 void setup() {
-  // Initialize UART serial communication with RPi
-  Serial3.begin(500000);
+  // Initialize the USB and UART serial communication
+  Serial.begin(500000); // USB Serial for debugging
+  Serial3.begin(500000); // UART Serial for Teensy-RPi communication
+  while (!Serial3) {
+    ; // wait for the UART serial to connect
+  }
 
   // Setup the robot
   myRobot.SETUP();

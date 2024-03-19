@@ -11,6 +11,7 @@
 #include <Wire.h>
 #include <string>
 #include <array>
+
 using namespace std;
 
 class GTernal
@@ -40,6 +41,7 @@ class GTernal
     bool checkCharging(); // Returns true if the battery is currently charging
     float checkBattVoltage(); // Reads and returns the current battery voltage
 
+    void enableMuxPort(uint8_t port); // Enable the desired port on the Mux
     void measureDistances(JsonArray& array); // Read and store the sensor distances in the json array passed into the function
     void getOrientation(JsonArray& oriArray); // Read and store the orientation data in the json array passed into the function
     
@@ -96,6 +98,7 @@ class GTernal
     static constexpr uint8_t _PWML = 23;// D23 // Left Motor PWM Control
 
     static constexpr uint8_t _STBY = 6;// D6 // Standby pin to shut off motor board
+    static constexpr uint8_t _motEN = 5;// D5 // Motor enable pin
 
     static constexpr uint8_t _RMotor1 = 0;// D0 // Right Motor Direction 1
     static constexpr uint8_t _RMotor2 = 1;// D1 // Right Motor Direction 2

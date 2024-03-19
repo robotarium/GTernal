@@ -1,6 +1,10 @@
 #include "GTernal.h"
 
 Adafruit_INA260 ina260 = Adafruit_INA260();
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire);
+uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;
+VL53L4CD sensor_vl53l4cd_sat(&Wire, A1);
+int NUMBER_OF_SENSORS = 6;  // Number of VL53L4CD sensors on GTernal. N_sensors - 1 for indexing purposes.
 
 // Initialize static members
 GTernal* GTernal::_instance = nullptr;
@@ -27,6 +31,8 @@ void GTernal::SETUP(){
 
   //Motor Control 
   pinMode(_STBY, OUTPUT);
+  pinMode(_motEN, OUTPUT);
+  digitalWrite(_motEN, HIGH); //Enable the motor driver
 
   pinMode(_PWMR, OUTPUT); 
   pinMode(_PWML, OUTPUT);  
@@ -41,6 +47,8 @@ void GTernal::SETUP(){
   pinMode(_rpiEnable, OUTPUT);
   digitalWrite(_rpiEnable, LOW);
 
+  // Initialize I2C bus.
+  Wire.begin();
 
   ///////////////////////////////////////////////////////////
   // Neo Pixel Setup
@@ -57,6 +65,37 @@ void GTernal::SETUP(){
     Serial.print("Ooops, no INA260 detected ... Check your wiring or I2C ADDR!");
     while (1);
   }
+
+  ///////////////////////////////////////////////////////////
+  // VL53L4CD Setup
+  ///////////////////////////////////////////////////////////
+  // Configure VL53L4CD satellite component.
+  for (byte x = 0 ; x <= NUMBER_OF_SENSORS ; x++)
+  {
+    enableMuxPort(x); //Tell mux to connect to port X
+    sensor_vl53l4cd_sat.begin();
+    //Switch off VL53L4CD satellite component.
+    sensor_vl53l4cd_sat.VL53L4CD_Off();
+    //Initialize VL53L4CD satellite component.
+    sensor_vl53l4cd_sat.InitSensor();
+    // 10ms timing budget and continuous mode
+    sensor_vl53l4cd_sat.VL53L4CD_SetRangeTiming(10, 0);
+    // Start Measurements
+    sensor_vl53l4cd_sat.VL53L4CD_StartRanging();
+    // Serial.println(int(x));
+  }
+
+  // ///////////////////////////////////////////////////////////
+  // // BNO055 Setup
+  // ///////////////////////////////////////////////////////////
+  // Initialize the sensor
+  if (!bno.begin())
+  {
+    /* There was a problem detecting the BNO055 ... check your connections */
+    Serial.println("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    while (1);
+  }
+  Wire.endTransmission();
 
   ///////////////////////////////////////////////////////////
   //Start Timers for Control Loops
@@ -175,7 +214,17 @@ void GTernal::jsonSerialRead(){
             statusArray.add(1);
             body["power"] = ina260.readPower();
             // body["power"] = filteredMeasurement(20, "power");
+          }
+          else if (strcmp(ifaceStr,"distances") == 0){ 
+            statusArray.add(1);
+            JsonArray& distanceArray = body.createNestedArray("distances");
+            measureDistances(distanceArray);
           } 
+          else if (strcmp(ifaceStr,"orientation") == 0){
+            statusArray.add(1);
+            JsonArray& orientationArray = body.createNestedArray("orientation");
+            getOrientation(orientationArray);
+          }
           break;
         }
         case 1://write
@@ -231,7 +280,7 @@ void GTernal::communicationCheck(float communicationWaitTime){
 }
 
 void GTernal::followCommands(){
-  if (_v == float(0) and _w == float(0)){
+  if (abs(_v) < float(0.0001) and abs(_w) < float(0.01)){
     noMotion();
   }
   else{
@@ -344,6 +393,34 @@ void GTernal::getEncoderCounts(int encoderData[]){
   _readEncoders();
   encoderData[0] = _encoderCountL;
   encoderData[1] = _encoderCountR;
+}
+
+// Mux selection function for VL53L4CD sensors
+void GTernal::enableMuxPort(uint8_t port){
+  Wire.beginTransmission(0x70); //select the mux
+  Wire.write(1 << port);        //send bit to select bus
+  Wire.endTransmission();
+}
+
+void GTernal::measureDistances(JsonArray& outputArray){
+  array<VL53L4CD_Result_t, 7> sensorOutputs;
+  
+  for(byte x = 0 ; x <= NUMBER_OF_SENSORS ; x++){
+      // (Mandatory) Clear HW interrupt to restart measurements
+      enableMuxPort(x); //Tell mux to connect to port X
+      sensor_vl53l4cd_sat.VL53L4CD_ClearInterrupt();
+      // Read measured distance. RangeStatus = 0 means valid data
+      sensor_vl53l4cd_sat.VL53L4CD_GetResult(&sensorOutputs[x]);
+      outputArray.add(double(sensorOutputs[x].distance_mm)/1000); // Store distance value in meters
+  }
+}
+
+void GTernal::getOrientation(JsonArray& oriOutputArray){
+  sensors_event_t orientationData;
+  bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+  oriOutputArray.add(orientationData.orientation.x); // Store x, y, z orientation data
+  oriOutputArray.add(orientationData.orientation.y);
+  oriOutputArray.add(orientationData.orientation.z);
 }
 
 ///////////////////////////////////////////////////////////

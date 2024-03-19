@@ -1,5 +1,4 @@
 #!/bin/bash
 
-(cd ../; sudo docker build --no-cache \
-                           --tag gternal:firmware \
+(cd ../; sudo docker build --tag gternal:firmware \
                            -f docker/Dockerfile .)
