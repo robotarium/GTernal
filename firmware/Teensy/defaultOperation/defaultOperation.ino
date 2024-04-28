@@ -7,10 +7,6 @@ WDT_T4<WDT1> wdt;
 void setup() {
   // Initialize the USB and UART serial communication
   Serial.begin(500000); // USB Serial for debugging
-  Serial3.begin(500000); // UART Serial for Teensy-RPi communication
-  while (!Serial3) {
-    ; // wait for the UART serial to connect
-  }
 
   // Setup the robot
   myRobot.SETUP();
@@ -23,8 +19,10 @@ void setup() {
   config.timeout = 2; // Watchodog timer timeout in seconds
   wdt.begin(config);
 
+  Serial3.begin(500000); // UART Serial for Teensy-RPi communication
+
   // Start the interrupt service routine (ISR) for PID motor control
-  myRobot.beginISR();
+//  myRobot.beginISR();
 }
 
 void loop() {
@@ -39,6 +37,7 @@ void loop() {
   else{
     myRobot.jsonSerialRead(); // Read JSON messages from the RPi
     myRobot.communicationCheck(500); // Stop the motors if no message is received for 500ms
+    myRobot.followCommands();
   }
 
   // Feed the watchdog timer

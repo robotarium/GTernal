@@ -70,32 +70,32 @@ void GTernal::SETUP(){
   // VL53L4CD Setup
   ///////////////////////////////////////////////////////////
   // Configure VL53L4CD satellite component.
-  for (byte x = 0 ; x <= NUMBER_OF_SENSORS ; x++)
-  {
-    enableMuxPort(x); //Tell mux to connect to port X
-    sensor_vl53l4cd_sat.begin();
-    //Switch off VL53L4CD satellite component.
-    sensor_vl53l4cd_sat.VL53L4CD_Off();
-    //Initialize VL53L4CD satellite component.
-    sensor_vl53l4cd_sat.InitSensor();
-    // 10ms timing budget and continuous mode
-    sensor_vl53l4cd_sat.VL53L4CD_SetRangeTiming(10, 0);
-    // Start Measurements
-    sensor_vl53l4cd_sat.VL53L4CD_StartRanging();
-    // Serial.println(int(x));
-  }
+  // for (byte x = 0 ; x <= NUMBER_OF_SENSORS ; x++)
+  // {
+  //   enableMuxPort(x); //Tell mux to connect to port X
+  //   sensor_vl53l4cd_sat.begin();
+  //   //Switch off VL53L4CD satellite component.
+  //   sensor_vl53l4cd_sat.VL53L4CD_Off();
+  //   //Initialize VL53L4CD satellite component.
+  //   sensor_vl53l4cd_sat.InitSensor();
+  //   // 10ms timing budget and continuous mode
+  //   sensor_vl53l4cd_sat.VL53L4CD_SetRangeTiming(10, 0);
+  //   // Start Measurements
+  //   sensor_vl53l4cd_sat.VL53L4CD_StartRanging();
+  //   // Serial.println(int(x));
+  // }
 
   // ///////////////////////////////////////////////////////////
   // // BNO055 Setup
   // ///////////////////////////////////////////////////////////
   // Initialize the sensor
-  if (!bno.begin())
-  {
-    /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.println("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    while (1);
-  }
-  Wire.endTransmission();
+  // if (!bno.begin())
+  // {
+  //   /* There was a problem detecting the BNO055 ... check your connections */
+  //   Serial.println("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+  //   while (1);
+  // }
+  // Wire.endTransmission();
 
   ///////////////////////////////////////////////////////////
   //Start Timers for Control Loops

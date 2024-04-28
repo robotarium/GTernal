@@ -15,13 +15,13 @@ void setup() {
 
 void loop() {
   // Motor
-//  myRobot.setVelocity(0.0,0.0);
-//  myRobot.getWheelSpeeds(wheelSpeed);
-//  Serial.print("Left:");
-//  Serial.print(wheelSpeed[0]);
-//  Serial.print(" ");
-//  Serial.print("Right:");
-//  Serial.println(wheelSpeed[1]);
+  myRobot.setVelocity(0.032, 0.0);
+  myRobot.getWheelSpeeds(wheelSpeed);
+  Serial.print("Left:");
+  Serial.print(wheelSpeed[0]);
+  Serial.print(" ");
+  Serial.print("Right:");
+  Serial.println(wheelSpeed[1]);
 
   // ToF sensor
   JsonObject& jsonOut = _jsonBufferOut.createObject();
@@ -33,13 +33,13 @@ void loop() {
   delay(10);
 
   // Encoder
-//  myRobot.getEncoderCounts(encoderCount);
+  //  myRobot.getEncoderCounts(encoderCount);
 
   // Charging status
-//   Serial.println(myRobot.checkBattVoltage());
-//   Serial.println(myRobot.checkCharging());
-//  Serial.println(ina260.readBusVoltage());
-//   Serial.println(myRobot.filteredMeasurement(10,"voltage"));
-//   Serial.println(myRobot.filteredMeasurement(10,"current"));
-//   Serial.println(myRobot.filteredMeasurement(10,"power"));
+  //   Serial.println(myRobot.checkBattVoltage());
+  //   Serial.println(myRobot.checkCharging());
+  //  Serial.println(ina260.readBusVoltage());
+  //   Serial.println(myRobot.filteredMeasurement(10,"voltage"));
+  //   Serial.println(myRobot.filteredMeasurement(10,"current"));
+  //   Serial.println(myRobot.filteredMeasurement(10,"power"));
 }

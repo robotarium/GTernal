@@ -271,7 +271,8 @@ def main():
 
     # Local barrier with ToF sensors
     # si_barrier_cert = create_single_integrator_barrier_certificate(barrier_gain=100, safety_radius=0.10)
-    si_barrier_cert = create_single_integrator_barrier_certificate2(barrier_gain=1e3, safety_radius=0.05, unsafe_barrier_gain=1e5)
+    # si_barrier_cert = create_single_integrator_barrier_certificate2(barrier_gain=1e3, safety_radius=0.15, unsafe_barrier_gain=1e5)
+    si_barrier_cert = create_single_integrator_barrier_certificate2(barrier_gain=750, safety_radius=0.05, unsafe_barrier_gain=750)
     si_to_uni_dyn, uni_to_si_states = create_si_to_uni_mapping()
     uni_to_si_dyn = create_uni_to_si_dynamics()
     # si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion()
@@ -279,6 +280,7 @@ def main():
     # Initialize data
     status_data = {'batt_volt': -1, 'charge_status': False, 'bus_volt':-1, 'bus_current':-1, 'power':-1, 'distances':-1, 'orientation':-1}
     last_input_msg = {}
+    distance_array = np.zeros((5, 7))
 
     # Main loop for the robot
     serial._serial.reset_input_buffer()
@@ -353,9 +355,17 @@ def main():
         if(status_data['distances'] is not -1):
             # logger.info('Distances: ({})'.format(status_data['distances']))
             # logger.info('length({})'.format(np.array(status_data['distances']).shape[0]))
+            if distance_array.sum() == 0:
+                distance_array = np.tile(np.array(status_data['distances']), (5, 1))
+            else:
+                distance_array = np.roll(distance_array, 1, axis=0)
+                distance_array[-1] = np.array(status_data['distances'])
+            filtered_distances = np.mean(distance_array, axis=0).reshape(-1, 1)
+                
             try:
                 received_control_si = uni_to_si_dyn(received_control, np.array([[0],[0],[0]]))
-                dxi = si_barrier_cert(received_control_si, np.array(status_data['distances']))
+                # dxi = si_barrier_cert(received_control_si, np.array(status_data['distances']))
+                dxi = si_barrier_cert(received_control_si, filtered_distances)
                 # Threshold magnitude
                 norm = np.linalg.norm(dxi, axis=0)
                 if norm[0] > 0.15:
