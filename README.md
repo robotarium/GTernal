@@ -6,12 +6,12 @@
 > [!NOTE]
 > The absolute path for the 'Arduino/libraries' directory is OS dependent, and this can be found here: https://support.arduino.cc/hc/en-us/articles/4412950938514-Open-the-Sketchbook
     
-    > [!NOTE]
-    > The firmware for Teensy requires ArduinoJson 5.13 which is included in 'GTernal/firmware/Teensy/libraries.'
-    > ArduinoJson 6 is currently not compatible with the firmware.
+> [!NOTE]
+> The firmware for Teensy requires ArduinoJson 5.13 which is included in 'GTernal/firmware/Teensy/libraries.'
+> ArduinoJson 6 is currently not compatible with the firmware.
 3. Connect a Teensy to the computer using a micro-USB cable.
-    > [!NOTE]
-    > The micro-USB cable needs to be directly connected to the Teensy and not the micro-USB port on the robot PCB.
+> [!NOTE]
+> The micro-USB cable needs to be directly connected to the Teensy and not the micro-USB port on the robot PCB.
 4. Run Teensyduino and open 'defaultOperation.ino' located in 'GTernal/firmware/defaultOperation' directory.
 5. Select the Teensy board to be flashed under 'Tools > Port'
 6. Click the upload icon (right arrow icon).
@@ -28,8 +28,8 @@
 9. Under 'SERVICES' tab, check 'Enable SSH' and 'Use password authentication'
 9. Click 'SAVE' and click 'YES.'
 10. Produce as many micro-SD cards as the number of robots to be built.
-    > [!NOTE]
-    > Whenever the Raspberry Pi Imager is restarted, make sure to re-type the passwords for the Pi and the Wifi. The Raspberry Pi Imager seems to be ruining the passwords saved in the advanced setting when the program is restarted even if the 'Image customization options' is set to 'to always use.'
+> [!NOTE]
+> Whenever the Raspberry Pi Imager is restarted, make sure to re-type the passwords for the Pi and the Wifi. The Raspberry Pi Imager seems to be ruining the passwords saved in the advanced setting when the program is restarted even if the 'Image customization options' is set to 'to always use.'
 
 <!-- ## 2 - Setup the RPi
 1. Eject the micro-SD card from the computer and insert it onto a Raspberry Pi and power it up.
@@ -72,11 +72,11 @@ e.g. ./docker_build.sh 192.168.1.8 1884
 This section assumes that:
 1. You have loaded micro-SD card(s) with the Raspberry Pi OS as previously detailed.
 2. You have fully assembled robots.
-    > [!NOTE]
-    > Check if the Pi and Teensy are connected through UART. If the Pi is not connected with a programmed Teensy as instructed in Step 1, the firmware will not be started by the setup script properly in the following steps.
+> [!NOTE]
+> Check if the Pi and Teensy are connected through UART. If the Pi is not connected with a programmed Teensy as instructed in Step 1, the firmware will not be started by the setup script properly in the following steps.
 3. Only the new robots to be setup are connected to the WiFi.
-    > [!IMPORTANT]
-    > The current automatic setup script looks for all robots with the MAC addresses specified in 'GTernal/config/mac_list.json' file and starts the setup process for the robots. Therefore, it will start the setup process even for the robots already with the firmware installed if they are connected to the WiFi. Since this may cause problems for the existing robots, t is recommended to only turn on the new robots to be set up.
+> [!IMPORTANT]
+> The current automatic setup script looks for all robots with the MAC addresses specified in 'GTernal/config/mac_list.json' file and starts the setup process for the robots. Therefore, it will start the setup process even for the robots already with the firmware installed if they are connected to the WiFi. Since this may cause problems for the existing robots, t is recommended to only turn on the new robots to be set up.
 <!-- ## 1 - Repository Setup
 During the setup process, each robot runs an automatic setup script which clones the firmware from a GitHub repository. By default, the setup script clones the official GTernal repository. This needs to be changed to clone your repository with updated configuration files.
 
@@ -97,18 +97,18 @@ If you are not familiar with Git or GitHub, please refer to here: https://docs.g
 
     Check if the number of Raspberry Pis found by the above command matches the total number of Raspberry Pis being set up. Wait a few more minutes and check again if not all robots show up in the list.
 
-    > [!NOTE]
-    > The network-device-name can be found by running 'ifconfig' command into the terminal. There may be multiple network devices on your computer. The right device is the one connected to the same WiFi network as the Raspberry Pis. Typically, the local IP address assigned by a network router is '192.168.x.x' or '10.0.x.x.'
+> [!NOTE]
+> The network-device-name can be found by running 'ifconfig' command into the terminal. There may be multiple network devices on your computer. The right device is the one connected to the same WiFi network as the Raspberry Pis. Typically, the local IP address assigned by a network router is '192.168.x.x' or '10.0.x.x.'
 
 3. Assign an unallocated robot ID# for the MAC address of a Raspberry Pi found in the previous step. Then, add/replace the robot ID# and the MAC address of the Raspberry Pi in 'GTernal/config/mac_list.json'
 
-    > [!NOTE]
-    > When assigning an index to a new robot, assign an Aruco tag ID or the ID engraved on a Vicon hat plate. Make sure not to use any numbers that are already assigned to other robots. For more information about generating Vicon hats, see https://github.com/skim743/gritsbotx_vicon_hats
+> [!NOTE]
+> When assigning an index to a new robot, assign an Aruco tag ID or the ID engraved on a Vicon hat plate. Make sure not to use any numbers that are already assigned to other robots. For more information about generating Vicon hats, see https://github.com/skim743/gritsbotx_vicon_hats
 
 4. Replace lines 12 and 13 in 'GTernal/docker/docker_run.sh' with the IP address and port of the MQTT host.
 
-    > [!NOTE]
-    > The default GTernal firmware requires an MQTT broker. For more information about the MQTT broker, please refer to https://github.com/robotarium/mqtt_broker.
+> [!NOTE]
+> The default GTernal firmware requires an MQTT broker. For more information about the MQTT broker, please refer to https://github.com/robotarium/mqtt_broker.
 
 5. Start the setup process by running
     ```
