@@ -1,41 +1,45 @@
-#include <Adafruit_SPITFT_Macros.h>
-#include <Adafruit_GFX.h>
-#include <gfxfont.h>
-#include <Adafruit_SPITFT.h>
-
+#include "Watchdog_t4.h"
 #include <GTernal.h>
 
 GTernal myRobot;
-int garbage[2];
+WDT_T4<WDT1> wdt;
 
 void setup() {
-  Serial.begin(500000);
-  Serial3.begin(500000);
+  // Initialize the USB and UART serial communication
+  Serial.begin(500000); // USB Serial for debugging
+
+  // Setup the robot
   myRobot.SETUP();
-  myRobot.rainbow(10);
+  myRobot.rainbow(10); // Welcome rainbow light
   myRobot.turnOffLED();
+
+  // Setup the watchdog timer
+  WDT_timings_t config;
+  config.trigger = 1; // Watchdog timer trigger in seconds
+  config.timeout = 2; // Watchodog timer timeout in seconds
+  wdt.begin(config);
+
+  Serial3.begin(500000); // UART Serial for Teensy-RPi communication
 }
 
 void loop() {
-//  myRobot.getEncoderCounts(garbage);
-//  myRobot.checkCharging();
-//  if (myRobot.checkCharging()){ //If we're charging disable unnecessary current draws.
-//    myRobot.disableIR();
-//    myRobot.turnOffLED();
-//  }
-//  myRobot.checkBattVoltage();
-//
- myRobot.jsonSerialRead();
- myRobot.communicationCheck(500);
- myRobot.followCommands();
+  // Update the watchdog timer
+  static uint32_t wdt_time = millis();
 
-// For debugging purposes
-//   myRobot.PIDMotorControl(1.0, 1.0);
-//   myRobot.moveR(100);
-//   myRobot.moveL(100);
-//   delay(3000);
-//   myRobot.noMotion();
-//   delay(3000);
-//   Serial.println(myRobot.checkBattVoltage());
-//   Serial.println(myRobot.checkCharging());
+  // Check if the robot is in fast charging mode
+  if (myRobot.isFastCharging()){
+    myRobot.monitorBattVolt(); // Monitor the battery voltage
+  }
+  // If not, operate in normal mode
+  else{
+    myRobot.jsonSerialRead(); // Read JSON messages from the RPi
+    myRobot.communicationCheck(500); // Stop the motors if no message is received for 500ms
+    myRobot.followCommands();
+  }
+
+  // Feed the watchdog timer
+  if ( millis() - wdt_time > 1100 ) {
+    wdt_time = millis();
+    wdt.feed();
+  }
 }

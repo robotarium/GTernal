@@ -75,6 +75,9 @@ def main():
     elif args.command == 'setup':
         cmds = [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../setup/setup', 'pi@'+x+':/home/pi'] for x in id_to_ip.values()]
         _ = [cmds.append(['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo ./setup']) for x in id_to_ip.values()]
+    elif args.command == 'setup_local':
+        cmds = [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '-r', '../../GTernal/', 'pi@'+x+':/home/pi/git'] for x in id_to_ip.values()]
+        _ = [cmds.append(['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo ./setup_local']) for x in id_to_ip.values()]
 
     pids = []
     for cmd in cmds:

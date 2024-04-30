@@ -3,7 +3,7 @@
 Adafruit_INA260 ina260 = Adafruit_INA260();
 
 GTernal::GTernal():_motorLeft(_interruptL1, _interruptL2),_motorRight(_interruptR1, _interruptR2), \
-_strip(2,10,NEO_GRB + NEO_KHZ800){
+_strip(2,10,NEO_GRBW + NEO_KHZ800){
 
 }
 
@@ -32,6 +32,10 @@ void GTernal::SETUP(){
   
   pinMode(_LMotor1, OUTPUT); 
   pinMode(_LMotor2, OUTPUT);
+
+  //RPi Enable Pin
+  pinMode(_rpiEnable, OUTPUT);
+  digitalWrite(_rpiEnable, LOW);
 
   ///////////////////////////////////////////////////////////
   // Neo Pixel Setup
@@ -141,14 +145,17 @@ void GTernal::jsonSerialRead(){
           else if (strcmp(ifaceStr,"bus_volt") == 0){
             statusArray.add(1);
             body["bus_volt"] = ina260.readBusVoltage();
+            // body["bus_volt"] = filteredMeasurement(20, "voltage");
           }
           else if (strcmp(ifaceStr,"bus_current") == 0){
             statusArray.add(1);
             body["bus_current"] = ina260.readCurrent();
+            // body["bus_current"] = filteredMeasurement(20, "current");
           }
           else if (strcmp(ifaceStr,"power") == 0){
             statusArray.add(1);
             body["power"] = ina260.readPower();
+            // body["power"] = filteredMeasurement(20, "power");
           } 
           break;
         }
@@ -164,12 +171,17 @@ void GTernal::jsonSerialRead(){
           else if (strcmp(ifaceStr,"left_led") == 0){
             statusArray.add(1);
             JsonArray& _leftLED = jsonIn["body"][i]["rgb"];//Left LED RGB value
-            setSingleLED(1,_leftLED[0],_leftLED[1],_leftLED[2]);
+            setSingleLED(1,_leftLED[0],_leftLED[1],_leftLED[2],0);
           }
           else if (strcmp(ifaceStr,"right_led") == 0){
             statusArray.add(1);
             JsonArray& _rightLED = jsonIn["body"][i]["rgb"];//Right LED RGB value
-            setSingleLED(0,_rightLED[0],_rightLED[1],_rightLED[2]);
+            setSingleLED(0,_rightLED[0],_rightLED[1],_rightLED[2],0);
+          }
+          else if (strcmp(ifaceStr,"fast_charge") == 0){
+            Serial.println("Entering fast charging mode"); // For debugging
+            statusArray.add(1);
+            setFastChargingFlag(1);
           }
 
           _communicationTimeout = millis();
@@ -207,19 +219,19 @@ void GTernal::followCommands(){
 //Neo Pixel Functions
 ///////////////////////////////////////////////////////////
 
-void GTernal::setSingleLED(int pos, int r, int g, int b){
+void GTernal::setSingleLED(int pos, int r, int g, int b, int w){
   //Sets the color of one LED
   if (pos >= _strip.numPixels()){ // Controlling a non-existant LED (as defined in SETUP).
     return;
   } 
-  _strip.setPixelColor(pos, r, g, b);
+  _strip.setPixelColor(pos, r, g, b, w);
   _strip.show();
 }
 
-void GTernal::setAllLED(int r, int g, int b){
+void GTernal::setAllLED(int r, int g, int b, int w){
   //Sets the color of both LEDs
   for (int i = 0; i < _strip.numPixels(); i++){
-    _strip.setPixelColor(i, r, g, b);
+    _strip.setPixelColor(i, r, g, b, w);
   }
   _strip.show();
 }
@@ -227,7 +239,7 @@ void GTernal::setAllLED(int r, int g, int b){
 void GTernal::turnOffLED(){
   //Turns off both LEDs
   for (int i = 0; i < _strip.numPixels(); i++){
-    _strip.setPixelColor(i, 0, 0, 0);
+    _strip.setPixelColor(i, 0, 0, 0, 0);
   }
   _strip.show();
 }
@@ -237,10 +249,26 @@ void GTernal::rainbow(uint8_t wait) {
 
   for(j=0; j<256; j++) {
     for(i=0; i<_strip.numPixels(); i++) {
-      _strip.setPixelColor(i, _wheel((i+j) & 255));
+      // _strip.setPixelColor(i, _wheel((i+j) & 255));
+      _strip.setPixelColor(i, _wheel((i+j)));
     }
     _strip.show();
     delay(wait);
+  }
+
+  // Fade in and fade out the white LED on the Neopixel
+  for (int k = 0; k < 255; k++){
+    _strip.setPixelColor(0, 0, 0, 0, k);
+    // _strip.setPixelColor(1, 0, 0, 0, k);
+    _strip.show();
+    delay(wait/2);
+  }
+
+  for (int k = 255; k > 0; k--){
+    _strip.setPixelColor(0, 0, 0, 0, k);
+    // _strip.setPixelColor(1, 0, 0, 0, k);
+    _strip.show();
+    delay(wait/2);
   }
 }
 
@@ -249,14 +277,14 @@ void GTernal::rainbow(uint8_t wait) {
 uint32_t GTernal::_wheel(byte wheelPos) {
   wheelPos = 255 - wheelPos;
   if(wheelPos < 85) {
-    return _strip.Color(255 - wheelPos * 3, 0, wheelPos * 3);
+    return _strip.Color(255 - wheelPos * 3, 0, wheelPos * 3, 0);
   }
   if(wheelPos < 170) {
     wheelPos -= 85;
-    return _strip.Color(0, wheelPos * 3, 255 - wheelPos * 3);
+    return _strip.Color(0, wheelPos * 3, 255 - wheelPos * 3, 0);
   }
   wheelPos -= 170;
-  return _strip.Color(wheelPos * 3, 255 - wheelPos * 3, 0);
+  return _strip.Color(wheelPos * 3, 255 - wheelPos * 3, 0, 0);
 }
 
 ///////////////////////////////////////////////////////////
@@ -540,4 +568,91 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
 
       _PIDMotorsTimeStart = millis();
     }
+}
+
+///////////////////////////////////////////////////////////
+//Fast Charging Mode
+///////////////////////////////////////////////////////////
+void GTernal::setFastChargingFlag(bool flag){
+  _flagFastCharging = flag;
+
+  if (_flagFastCharging){
+    resetVoltageArray();
+    setSingleLED(0,127,30,0,0);
+  }
+  else{
+    turnOffLED(); // Turn off the Neopixel indicator
+  }
+}
+
+bool GTernal::isFastCharging(){
+  return _flagFastCharging;
+}
+
+float GTernal::avgVoltage(float voltNew){
+  float sumArray = 0;
+  float avgArray;
+  int sizeArray = sizeof(_battVoltArray) / sizeof(float);
+
+  _battVoltArray[_battVoltArrayIndx] = voltNew; // Update an element in the array with a new measurement
+  for (int i = 0; i < sizeArray; i++){
+    sumArray = sumArray + _battVoltArray[i];
+  }
+  avgArray = sumArray/sizeArray;
+
+  _battVoltArrayIndx++;
+  if (_battVoltArrayIndx >= sizeArray){
+    _battVoltArrayIndx = 0;
+  }
+  
+  return avgArray;
+}
+
+void GTernal::resetVoltageArray(){
+  int sizeArray = sizeof(_battVoltArray) / sizeof(float);
+  for (int i = 0; i < sizeArray; i++){
+    _battVoltArray[i] = 0;
+  }
+  _voltUpdateTime = millis();
+}
+
+void GTernal::monitorBattVolt(){
+  if (millis() - _voltUpdateTime >= 1000){ // 1 second interval
+    float avgBattVolt = avgVoltage(ina260.readBusVoltage());
+    _voltUpdateTime = millis();
+    Serial.println(avgBattVolt); // For debugging
+    
+    if (avgBattVolt > _battVoltThreshold){ // Check if the 30 second average battery voltage is higher than the threshold voltage (mV)
+      setFastChargingFlag(0); // Clear the fast charging flag
+
+      // Wake up the Raspberry Pi
+      digitalWrite(_rpiEnable, HIGH);
+      delay(100);
+      digitalWrite(_rpiEnable, LOW);
+    }
+  }
+}
+
+float GTernal::filteredMeasurement(int nSamples, char data[]){
+  float sumArray = 0;
+
+  if (strcmp(data, "voltage") == 0){
+    for (int i = 0; i < nSamples; i++){
+      sumArray = sumArray + ina260.readBusVoltage();
+    }
+  }
+  else if (strcmp(data, "current") == 0){
+    for (int i = 0; i < nSamples; i++){
+      sumArray = sumArray + ina260.readCurrent();
+    }
+  }
+  else if (strcmp(data, "power") == 0){
+    for (int i = 0; i < nSamples; i++){
+      sumArray = sumArray + ina260.readPower();
+    }
+  }
+  
+  float avgValue = sumArray/nSamples;
+
+  return avgValue;
 }

@@ -6,24 +6,23 @@ import argparse
 import queue
 import netifaces
 import vizier.log as log
+import subprocess
 
 global logger
 logger = log.get_logger()
 
 # Constants
 MAX_QUEUE_SIZE = 100
-
+LOW_BATT_THRESHOLD = 3900.0 # Low battery threshold voltage in mV
+BATT_VOLT_WINDOW = 30 # Time window in seconds for the moving average of the battery voltage. Currently, it is set to 1 sample per second.
 
 def get_mac():
     """Gets the MAC address for the robot from the network config info.
-
     Returns:
         str: A MAC address for the robot.
-
     Example:
         >>> print(get_mac())
         AA:BB:CC:DD:EE:FF
-
     """
 
     interface = [x for x in netifaces.interfaces() if 'wlan' in x][0]
@@ -32,18 +31,13 @@ def get_mac():
 
 def create_node_descriptor(end_point):
     """Returns a node descriptor for the robot based on the end_point.
-
     The server_alive link is for the robot to check the MQTT connection periodically.
-
     Args:
         end_point (str): The ID of the robot.
-
     Returns:
         dict: A node descriptor of the vizier format for the robot.
-
     Example:
         >>> node_descriptor(1)
-
     """
     node_descriptor = \
         {
@@ -71,26 +65,19 @@ def create_node_descriptor(end_point):
 
 class Request:
     """Represents serial requests to the microcontroller.
-
     The serial communications operate on a request/response architecture.  For example, the request is of a form (when JSON encoded)
-
     .. code-block:: python
-
         {'request': ['read', 'write', 'read'], 'iface': [iface1, iface2, iface3], body: [body1, body2, body3]}
-
     Attributes:
         request (list): A list of requests (or actions) to perform.  Must be 'read' or 'write'.
         iface (list): A list of interfaces on which to perform the request
         body (list): A list of bodies for the requests.  These are empty if the request is a read.
-
     """
 
     def __init__(self):
         """Initializes a request with optional iface, request, and body parameters.
-
         Returns:
             The created request.
-
         """
         self.iface = []
         self.request = []
@@ -98,17 +85,13 @@ class Request:
 
     def add_write_request(self, iface, body):
         """Adds a write to the request.
-
         Args:
             iface (str): The interface to write.
             body (dict): A JSON-encodable body to be written.
-
         Returns:
             The modified request containing the new interface and body.
-
         Examples:
             >>> r = Request().add_write_request('motor', {'v': 0.1, 'w': 0.0})
-
         """
 
         self.iface.append(iface)
@@ -119,13 +102,10 @@ class Request:
 
     def add_read_request(self, iface):
         """Adds a read to the request.
-
         Args:
             iface (str): Interface from which to read.
-
         Returns:
             The request with the added read.
-
         """
 
         self.iface.append(iface)
@@ -136,13 +116,10 @@ class Request:
 
     def to_json_encodable(self):
         """Turns the request into a JSON-encodable dict.
-
         Raises:
             Exception: If an underlying body element is not JSON-encodable.
-
         Returns:
             dict: A JSON-encodable dict representing the request.
-
         """
 
         req = {'request': self.request, 'iface': self.iface}
@@ -164,6 +141,17 @@ def handle_read_response(iface, status, body):
     else:
         logger.critical('Request for ({0}) not in body ({1}) after request.'.format(iface, body))
         return {}
+
+def avgVoltage(battVoltArray, voltNew, battVoltIndx, chargeStatusArray, statusNew):
+    battVoltArray[battVoltIndx] = voltNew
+    avgVolt = sum(battVoltArray)/len(battVoltArray)
+    chargeStatusArray[battVoltIndx] = statusNew
+
+    battVoltIndx = battVoltIndx + 1
+    if battVoltIndx >= BATT_VOLT_WINDOW:
+        battVoltIndx = 0
+
+    return avgVolt, battVoltIndx
 
 
 def main():
@@ -246,8 +234,14 @@ def main():
     print_time = time.time()
     status_update_time = time.time()
 
+    # Fast charging
+    battVoltArray = [0]*BATT_VOLT_WINDOW
+    battVoltIndx = 0
+    battThreshold = LOW_BATT_THRESHOLD
+    chargeStatusArray = [0]*BATT_VOLT_WINDOW
+
     # Initialize data
-    status_data = {'batt_volt': -1, 'charge_status': False}
+    status_data = {'batt_volt': -1, 'charge_status': False, 'bus_volt':-1, 'bus_current':-1, 'power':-1}
     last_input_msg = {}
 
     # Main loop for the robot
@@ -269,6 +263,10 @@ def main():
             handlers.append(lambda status, body: handle_read_response('bus_volt', status, body))
             handlers.append(lambda status, body: handle_read_response('bus_current', status, body))
             handlers.append(lambda status, body: handle_read_response('power', status, body))
+
+            if status_data['bus_volt'] > 0:
+                avgVolt, battVoltIndx = avgVoltage(battVoltArray, status_data['bus_volt'], battVoltIndx, chargeStatusArray, status_data['charge_status'])
+                logger.info('avgVolt = ({})'.format(avgVolt))
 
             status_update_time = start_time
 
@@ -330,6 +328,7 @@ def main():
                 status_data.update(handler(status[i], body[i]))
             logger.info('Status data ({})'.format(status_data))
             logger.info('Response ({})'.format(response))
+            # logger.info('Battery Voltage ({})'.format(status_data['bus_volt']))
             # logger.info('Length of handlers ({})'.format(len(handlers))) # For debugging
         else:
             # If we should have responses, but we don't
@@ -338,6 +337,27 @@ def main():
                 logger.info('Length of handlers ({})'.format(len(handlers)))
 
         robot_node.put(status_link, json.dumps(status_data))
+
+        # If the average battery voltage is below the threshold, and the robot is being charged, enter fast charging mode
+        if not 0 in battVoltArray and avgVolt < battThreshold and not 0 in chargeStatusArray:
+            logger.info('Charging battery voltage for 30 seconds: ({0}) mV < ({1}) mV. Entering fast charging mode'.format(round(avgVolt, 2), battThreshold))
+
+            # Signal Teensy that Raspberry Pi is entering fast charging mode
+            request = Request()
+            request.add_write_request('fast_charge', {})
+            handlers.append(handle_write_response)
+            response = None
+            if(len(handlers) > 0 and serial._serial.is_open):
+                try:
+                    response = serial.serial_request(request.to_json_encodable())
+                except Exception as e:
+                    logger.critical('Serial exception.')
+                    logger.critical(e)
+
+            # Shut down the Raspberry Pi through ssh from the firmware Docker image
+            cmd = ['sshpass', '-p', 'raspberry', 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@localhost', 'sudo shutdown now']
+            pid = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            pid.communicate()
 
         # # Print out status data
         # if((start_time - print_time) >= status_update_rate):
