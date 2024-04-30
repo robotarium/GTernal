@@ -3,8 +3,10 @@
 # 1 - Program Teensy
 1. Install Teensyduino (https://www.pjrc.com/teensy/td_download.html)
 2. Copy and paste all library folders in 'GTernal/firmware/Teensy/libraries' to 'Arduino/libraries'
+    <pre>
     > [!NOTE]
     > The absolute path for the 'Arduino/libraries' directory is OS dependent, and this can be found here: https://support.arduino.cc/hc/en-us/articles/4412950938514-Open-the-Sketchbook
+    </pre>
     
     > [!NOTE]
     > The firmware for Teensy requires ArduinoJson 5.13 which is included in 'GTernal/firmware/Teensy/libraries.'
