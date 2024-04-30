@@ -17,17 +17,16 @@
 6. Click the upload icon (right arrow icon).
 
 # 2 - Make the Base Image for Raspberry Pi
-1. Install and run the Raspberry Pi Imager (https://www.raspberrypi.com/software/).
-2. For 'Operating System,' select 'Raspberry Pi OS (other)' and select 'Raspberry Pi OS Lite (64-bit).' For Raspberry Pi Zero 1s, select 'Raspberry Pi OS Lite (32-bit)'
-    > [!IMPORTANT]  
-    > The newest version of Raspberry Pi OS released in 10/10/2023 is not fully compatible with the current setup script. Please use 'Raspberry Pi OS (Legacy) Lite' released in 5/3/2023 until we address the issue.
-3. For 'Storage,' choose the micro-SD card to be used.
-4. Before clicking the 'WRITE' button, click on the gear icon below the 'WRTIE' button to open the 'Advanced options.'
-5. Check 'Enable SSH' and 'Use password authentication.'
-6. Then, check 'Set username and password' and type 'pi' for the 'Username' and 'raspberry' for 'Password.'
+1. Install and run the Raspberry Pi Imager (https://www.raspberrypi.com/software/). The instuction is for Raspberry Pi Imager v.1.8.5
+2. For 'Raspberry Pi Device,' select the version of the Pi used.
+3. For 'Operating System,' select 'Raspberry Pi OS (other)' and select 'Raspberry Pi OS Lite (64-bit).' For Raspberry Pi Zero 1s, select 'Raspberry Pi OS Lite (32-bit)'
+4. For 'Storage,' choose the micro-SD card to be used.
+5. Click 'NEXT' and 'EDIT SETTINGS.' 
+6. Under 'GENERAL' tab, check 'Set username and password' and type 'pi' for the 'Username' and 'raspberry' for 'Password.'
 7. Next, check 'Configure wireless LAN' and enter 'SSID' and 'Password' for the router.
 8. Change 'Wireless LAN country' to 'US.' 'Set locale settings' is optional.
-9. Click 'SAVE' and click 'WRITE' button to start loading the image to the SD card.
+9. Under 'SERVICES' tab, check 'Enable SSH' and 'Use password authentication'
+9. Click 'SAVE' and click 'YES.'
 10. Produce as many micro-SD cards as the number of robots to be built.
     > [!NOTE]
     > Whenever the Raspberry Pi Imager is restarted, make sure to re-type the passwords for the Pi and the Wifi. The Raspberry Pi Imager seems to be ruining the passwords saved in the advanced setting when the program is restarted even if the 'Image customization options' is set to 'to always use.'
