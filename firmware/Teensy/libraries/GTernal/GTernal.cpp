@@ -60,11 +60,11 @@ void GTernal::SETUP(){
   ///////////////////////////////////////////////////////////
   // INA260 Setup
   ///////////////////////////////////////////////////////////
-  if (!ina260.begin())
-  {
-    Serial.print("Ooops, no INA260 detected ... Check your wiring or I2C ADDR!");
-    while (1);
-  }
+  // if (!ina260.begin())
+  // {
+  //   Serial.print("Ooops, no INA260 detected ... Check your wiring or I2C ADDR!");
+  //   while (1);
+  // }
 
   ///////////////////////////////////////////////////////////
   // VL53L4CD Setup

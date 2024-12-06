@@ -22,7 +22,7 @@ void setup() {
   Serial3.begin(500000); // UART Serial for Teensy-RPi communication
 
   // Start the interrupt service routine (ISR) for PID motor control
-//  myRobot.beginISR();
+  myRobot.beginISR();
 }
 
 void loop() {
@@ -37,7 +37,7 @@ void loop() {
   else{
     myRobot.jsonSerialRead(); // Read JSON messages from the RPi
     myRobot.communicationCheck(500); // Stop the motors if no message is received for 500ms
-    myRobot.followCommands();
+//    myRobot.followCommands();
   }
 
   // Feed the watchdog timer
