@@ -410,7 +410,7 @@ void GTernal::enableMuxPort(uint8_t port){
 void GTernal::measureDistances(JsonArray& outputArray){
   array<VL53L4CD_Result_t, 7> sensorOutputs;
   
-  for(uint8_t x = 0 ; x <= NUMBER_OF_SENSORS ; x++){
+  for(uint8_t x = 0 ; x <= _NUMBER_OF_SENSORS ; x++){
       // (Mandatory) Clear HW interrupt to restart measurements
       enableMuxPort(x); //Tell mux to connect to port X
       sensor_vl53l4cd_sat.VL53L4CD_ClearInterrupt();
@@ -539,11 +539,12 @@ void GTernal::moveR(int motorSpeed){
     motorSpeed = 255;
   }
 
+  // Removed as protection is added in control loop.
   // Back-emf protection for rapid direction changes
-  if (motorSpeed*_motorSpeedR_old < 0){
-    brake();
-    delay(1);
-  }
+  // if (motorSpeed*_motorSpeedR_old < 0){
+  //  noMotion();
+  //  delay(1);
+  // }
 
   // Move the motor.
   digitalWrite(_RMotor1, in1);
@@ -571,11 +572,12 @@ void GTernal::moveL(int motorSpeed){
     motorSpeed = 255;
   }
 
+  // Removed as protection is added in control loop.
   // Back-emf protection for rapid direction changes
-  if (motorSpeed*_motorSpeedL_old < 0){
-    brake();
-    delay(1);
-  }
+  //if (motorSpeed*_motorSpeedL_old < 0){
+  //  brake();
+  //  delay(1);
+  //}
 
   // Move the motor.
   digitalWrite(_LMotor1, in1);

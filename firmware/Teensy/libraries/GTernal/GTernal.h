@@ -89,7 +89,7 @@ class GTernal
     static constexpr int _encoderCountsPerRotation = 28; // Encoder counts per single shaft rotation.
     static constexpr float _motorGearRatio = 100; // The gearing ratio of the drive motor being used.
     static constexpr float _wheelDiameter = 0.032; // Wheel Diameter in cm.
-    static constexpr float _axelLength = 0.105; // Axel length in cm.
+    static constexpr float _axelLength = 0.11; // Axel length in cm.
     static constexpr float _battVoltThreshold = 4000.0; // Threshold battery voltage (mV) for turning turning the RPi on when in fast charging mode
 
     ///////////////////////////////////////////////////////////
@@ -208,7 +208,7 @@ class GTernal
     int _oldMotorL;//Old Left Motor Speed (Arduino PWM Units, int 0-255). Used to limit acceleration of motor to prevent voltage sag.
     int _oldMotorR;//Old Right Motor Speed (Arduino PWM Units, int 0-255). Used to limit acceleration of motor to prevent voltage sag.
 
-    int _maxMotorInc = 100;//Maximum PWM increase in a time step.
+    int _maxMotorInc = 50;//Maximum PWM increase in a time step (0.01).
 
     int _oldMotorPIDEncoderCountL;//Old Encoder Count storage for PIDMotorControl Function
     int _oldMotorPIDEncoderCountR;
