@@ -588,6 +588,8 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
       _integralR = 0; 
       _oldErrorL = 0;
       _oldErrorR = 0;
+      _oldMotorL = 0;
+      _oldMotorR = 0;
     }
 
     if(millis() - _PIDMotorsTimeStart >= 3*timeStep){//There's been a large time delay, reset the timer and current encoder error
@@ -660,7 +662,24 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
       else{
         _motorL += int(_motorDigitalK*(_kpMotor*errorL + _kiMotor*_integralL + _kdMotor*diffL));
       }
-      
+
+      if (abs(_motorL - _oldMotorL) > _maxMotorInc){ // Check for command that requires high acceleration
+        if(_motorL - _oldMotorL > 0){
+          _motorL = _oldMotorL + _maxMotorInc;
+        }else{
+          _motorL = _oldMotorL - _maxMotorInc;
+        }
+        
+      }
+
+      if (abs(_motorR - _oldMotorR) > _maxMotorInc){ // Check for command that requires high acceleration
+        if(_motorR - _oldMotorR > 0){
+          _motorR = _oldMotorR + _maxMotorInc;
+        }else{
+          _motorR = _oldMotorR - _maxMotorInc;
+        }
+      }
+
       //Check and deal with motor saturation.
       if (_motorL>255){
         _integralL -= (errorL*PIDTimeStep); //Don't integrate at saturation
@@ -686,6 +705,9 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
         _satR = true;
         _motorR=-255;
       }
+
+      _oldMotorR = _motorR;
+      _oldMotorL = _motorL;
 
       moveL(_motorL);
       moveR(_motorR);

@@ -195,6 +195,11 @@ class GTernal
     int _motorL;//Left Motor Speed (Arduino PWM Units, int 0-255)
     int _motorR;//Right Motor Speed (Arduino PWM Units, int 0-255)
 
+    int _oldMotorL;//Old Left Motor Speed (Arduino PWM Units, int 0-255). Used to limit acceleration of motor to prevent voltage sag.
+    int _oldMotorR;//Old Right Motor Speed (Arduino PWM Units, int 0-255). Used to limit acceleration of motor to prevent voltage sag.
+
+    int _maxMotorInc = 100;//Maximum PWM increase in a time step.
+
     int _oldMotorPIDEncoderCountL;//Old Encoder Count storage for PIDMotorControl Function
     int _oldMotorPIDEncoderCountR;
 
