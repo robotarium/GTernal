@@ -70,7 +70,7 @@ void GTernal::SETUP(){
   // VL53L4CD Setup
   ///////////////////////////////////////////////////////////
   // Configure VL53L4CD satellite component.
-  // for (byte x = 0 ; x <= NUMBER_OF_SENSORS ; x++)
+  // for (uint8_t x = 0 ; x <= NUMBER_OF_SENSORS ; x++)
   // {
   //   enableMuxPort(x); //Tell mux to connect to port X
   //   sensor_vl53l4cd_sat.begin();
@@ -347,7 +347,7 @@ void GTernal::rainbow(uint8_t wait) {
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
-uint32_t GTernal::_wheel(byte wheelPos) {
+uint32_t GTernal::_wheel(uint8_t wheelPos) {
   wheelPos = 255 - wheelPos;
   if(wheelPos < 85) {
     return _strip.Color(255 - wheelPos * 3, 0, wheelPos * 3, 0);
@@ -405,7 +405,7 @@ void GTernal::enableMuxPort(uint8_t port){
 void GTernal::measureDistances(JsonArray& outputArray){
   array<VL53L4CD_Result_t, 7> sensorOutputs;
   
-  for(byte x = 0 ; x <= NUMBER_OF_SENSORS ; x++){
+  for(uint8_t x = 0 ; x <= NUMBER_OF_SENSORS ; x++){
       // (Mandatory) Clear HW interrupt to restart measurements
       enableMuxPort(x); //Tell mux to connect to port X
       sensor_vl53l4cd_sat.VL53L4CD_ClearInterrupt();

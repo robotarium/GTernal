@@ -273,7 +273,7 @@ class GTernal
     float _rad2deg(float rad); //Converts radians to degrees.
     float _wrapToPi(float rad); //Wraps a radian angle to (-pi,pi]
     float _wrapTo2Pi(float rad); //Wrap a radian angle to [0,2*pi)
-    uint32_t _wheel(byte wheelPos); //Given a byte will return an RGB color
+    uint32_t _wheel(uint8_t wheelPos); //Given a uint8_t will return an RGB color
 
 };
 
