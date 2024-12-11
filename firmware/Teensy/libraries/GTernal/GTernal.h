@@ -37,7 +37,8 @@ class GTernal
 
     void getEncoderCounts(int encoderData[]); // Read and store the encoders tick counts in the argument array [Left, Right]
     void getWheelSpeeds(float wheelSpeeds[]); // Read and store the wheel speeds in the argument array [Left, Right]
-    void readWheelSpeeds(); // Read and store the wheel speeds in the private variables _wheelSpeedL, _wheelSpeedR
+    void updateWheelSpeeds(); // Update the wheel speeds
+    void getISRTime(float interruptTime[]); // Get the time elapsed in the ISR
     bool checkCharging(); // Returns true if the battery is currently charging
     float checkBattVoltage(); // Reads and returns the current battery voltage
 
@@ -77,13 +78,16 @@ class GTernal
   private:
     static IntervalTimer timerISR; //Timer for PID Motor Control
     static void isrHandler(); //Interrupt Handler for PID Motor Control
+    float _ISRElapsedTime; //Elapsed Time in ISR
+    int _motorSpeedR_old = 0; //Old Right Motor Speed
+    int _motorSpeedL_old = 0; //Old Left Motor Speed
 
     ///////////////////////////////////////////////////////////
     //Constants
     ///////////////////////////////////////////////////////////
     static constexpr float _pi = 3.1415926; // Pi...the number...DUH!!
     static constexpr int _encoderCountsPerRotation = 28; // Encoder counts per single shaft rotation.
-    static constexpr float _motorGearRatio = 100.37; // The gearing ratio of the drive motor being used.
+    static constexpr float _motorGearRatio = 100; // The gearing ratio of the drive motor being used.
     static constexpr float _wheelDiameter = 0.032; // Wheel Diameter in cm.
     static constexpr float _axelLength = 0.105; // Axel length in cm.
     static constexpr float _battVoltThreshold = 4000.0; // Threshold battery voltage (mV) for turning turning the RPi on when in fast charging mode
@@ -141,6 +145,11 @@ class GTernal
     // 1: Write
     int _method = -1;
     float _communicationTimeout; // Timer since last communication
+
+    ///////////////////////////////////////////////////////////
+    //ToF Distance Sensor
+    ///////////////////////////////////////////////////////////
+    const int _NUMBER_OF_SENSORS = 6;  // Number of VL53L4CD sensors on GTernal. N_sensors - 1 for indexing purposes.
     
     ///////////////////////////////////////////////////////////
     //IR Sensor Distance Variables
@@ -182,18 +191,19 @@ class GTernal
 
     float _PIDMotorsTimeStart;
     float _encoderTimeStart;
+    float _PIDTimeStep = 0.01; // 0.01s = 10 ms (100 Hz)
     bool _driveStart;
     bool _encoderStart;
     volatile float _v;
     volatile float _w;
 
-    static constexpr float _kpMotor = 6.0;// = 0.904;
-    static constexpr float _kiMotor = 3.0;// = 146;
-    static constexpr int _kdMotor = 0.3;// = 0;
+    static constexpr float _kpMotor = 2.7; //6.0;// = 0.904;
+    static constexpr float _kiMotor = 0.9; //3.0;// = 146;
+    static constexpr int _kdMotor = 0.95; //0.3;// = 0;
     static constexpr float _motorDigitalK = 1;// = 0.544;
 
-    int _motorL;//Left Motor Speed (Arduino PWM Units, int 0-255)
-    int _motorR;//Right Motor Speed (Arduino PWM Units, int 0-255)
+    int _motorL = 0;//Left Motor Speed (Arduino PWM Units, int 0-255)
+    int _motorR = 0;//Right Motor Speed (Arduino PWM Units, int 0-255)
 
     int _oldMotorL;//Old Left Motor Speed (Arduino PWM Units, int 0-255). Used to limit acceleration of motor to prevent voltage sag.
     int _oldMotorR;//Old Right Motor Speed (Arduino PWM Units, int 0-255). Used to limit acceleration of motor to prevent voltage sag.
@@ -218,6 +228,10 @@ class GTernal
     int _satRVal;
     bool _satL;
     int _satLVal;
+
+    int _speedBufferCount = 0; // Buffer count for wheel speed
+    float _wheelSpeedLBuffer[10]; // Buffer for left wheel speed
+    float _wheelSpeedRBuffer[10]; // Buffer for right wheel speed
 
     ///////////////////////////////////////////////////////////
     //Rotational PID Control Constants

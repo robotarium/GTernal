@@ -4,7 +4,7 @@ Adafruit_INA260 ina260 = Adafruit_INA260();
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire);
 uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;
 VL53L4CD sensor_vl53l4cd_sat(&Wire, A1);
-int NUMBER_OF_SENSORS = 6;  // Number of VL53L4CD sensors on GTernal. N_sensors - 1 for indexing purposes.
+
 
 // Initialize static members
 GTernal* GTernal::_instance = nullptr;
@@ -48,7 +48,7 @@ void GTernal::SETUP(){
   digitalWrite(_rpiEnable, LOW);
 
   // Initialize I2C bus.
-  Wire.begin();
+  // Wire.begin();
 
   ///////////////////////////////////////////////////////////
   // Neo Pixel Setup
@@ -111,7 +111,7 @@ void GTernal::SETUP(){
 ///////////////////////////////////////////////////////////
 
 void GTernal::beginISR(){
-  timerISR.begin(isrHandler, 10000); // 10000 us = 10 ms
+  timerISR.begin(isrHandler, 1000000*_PIDTimeStep); // In us
 }
 
 void GTernal::isrHandler(){
@@ -172,7 +172,9 @@ float GTernal::convertUnicycleToLeftMotor(float vel, float w){
 void GTernal::jsonSerialRead(){
   Serial3.clear();
   if(Serial3.available()){
+  // if(Serial.available()){
     JsonObject& jsonIn = _jsonBufferIn.parseObject(Serial3);
+    // JsonObject& jsonIn = _jsonBufferIn.parseObject(Serial);
     JsonObject& jsonOut = _jsonBufferOut.createObject();
     JsonArray& statusArray = jsonOut.createNestedArray("status");
     JsonArray& bodyArray = jsonOut.createNestedArray("body");
@@ -260,7 +262,9 @@ void GTernal::jsonSerialRead(){
       }  
     }
     if(Serial3.availableForWrite() >= jsonOut.size()+1){
+    // if(Serial.dtr()){
       jsonOut.printTo(Serial3);
+      // jsonOut.printTo(Serial);
       // jsonOut.printTo(Serial); // For debugging
       // Serial.println(jsonOut.size()); // For debugging
       _jsonBufferOut.clear();
@@ -286,6 +290,7 @@ void GTernal::followCommands(){
   else{
     PIDMotorControl(convertUnicycleToLeftMotor(_v,_w),convertUnicycleToRightMotor(_v,_w));
   }
+  // _ISRElapsedTime = millis(); // For debugging ISR timing
 }
 
 ///////////////////////////////////////////////////////////
@@ -390,7 +395,7 @@ void GTernal::_readEncoders(){
 
 void GTernal::getEncoderCounts(int encoderData[]){
   // Reads the current encoder count and stores it in the array argument. [Left, Right]
-  _readEncoders();
+  // _readEncoders();
   encoderData[0] = _encoderCountL;
   encoderData[1] = _encoderCountR;
 }
@@ -480,6 +485,10 @@ void GTernal::getWheelSpeeds(float wheelSpeeds[]){
   interrupts();
 }
 
+void GTernal::getISRTime(float interruptTime[]){
+  interruptTime[0] = _ISRElapsedTime;
+}
+
 ///////////////////////////////////////////////////////////
 //Motor Functions
 ///////////////////////////////////////////////////////////
@@ -530,10 +539,18 @@ void GTernal::moveR(int motorSpeed){
     motorSpeed = 255;
   }
 
+  // Back-emf protection for rapid direction changes
+  if (motorSpeed*_motorSpeedR_old < 0){
+    brake();
+    delay(1);
+  }
+
   // Move the motor.
   digitalWrite(_RMotor1, in1);
   digitalWrite(_RMotor2, in2);
   analogWrite(_PWMR, abs(motorSpeed)); 
+
+  _motorSpeedR_old = motorSpeed;
 }
 
 void GTernal::moveL(int motorSpeed){
@@ -554,10 +571,18 @@ void GTernal::moveL(int motorSpeed){
     motorSpeed = 255;
   }
 
+  // Back-emf protection for rapid direction changes
+  if (motorSpeed*_motorSpeedL_old < 0){
+    brake();
+    delay(1);
+  }
+
   // Move the motor.
   digitalWrite(_LMotor1, in1);
   digitalWrite(_LMotor2, in2);
   analogWrite(_PWML, abs(motorSpeed));
+
+  _motorSpeedL_old = motorSpeed;
 }
 
 void GTernal::setVelocity(float v, float w){
@@ -567,153 +592,205 @@ void GTernal::setVelocity(float v, float w){
   interrupts();
 }
 
+void GTernal::updateWheelSpeeds(){
+  _readEncoders();
+
+  int countL = _encoderCountL;
+  int countR = _encoderCountR;
+
+  _wheelSpeedL = 2.0*_pi * (countL - _oldMotorPIDEncoderCountL) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  _wheelSpeedR = 2.0 * _pi * (countR - _oldMotorPIDEncoderCountR) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+
+  _oldMotorPIDEncoderCountL = _encoderCountL;
+  _oldMotorPIDEncoderCountR = _encoderCountR;
+}
+
 ///////////////////////////////////////////////////////////
 //Controllers
 ///////////////////////////////////////////////////////////
 
 void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
-    /*Keeps the rotational speeds of the individual motors at setpoints desLVel and desRVel (rad/s).*/
+  /*Keeps the rotational speeds of the individual motors at setpoints desLVel and desRVel (rad/s).*/
+  // _PIDMotorsTimeStart = 2;
 
-    float timeStep = 10;
+  moveL(_motorL);
+  moveR(_motorR);
 
-    //Prefilter
-    // float a = 0.18;//Slightly tweaked to lower overshoot.
+  _readEncoders();
 
-    if(!_driveStart){//We recently stopped motion and didn't call the PID loop, reset the PID timers/variables.
-      _driveStart = true;
-      _PIDMotorsTimeStart = millis();
-      _oldMotorPIDEncoderCountL = _encoderCountL;
-      _oldMotorPIDEncoderCountR = _encoderCountR;
-      _integralL = 0;
-      _integralR = 0; 
-      _oldErrorL = 0;
-      _oldErrorR = 0;
-      _oldMotorL = 0;
-      _oldMotorR = 0;
+  if(!_driveStart){//We recently stopped motion and didn't call the PID loop, reset the PID timers/variables.
+    _driveStart = true;
+    _oldMotorPIDEncoderCountL = _encoderCountL;
+    _oldMotorPIDEncoderCountR = _encoderCountR;
+    _integralL = 0;
+    _integralR = 0; 
+    _oldErrorL = 0;
+    _oldErrorR = 0;
+    _oldMotorL = 0;
+    _oldMotorR = 0;
+  }
+
+  float desLVel = desLVelInput;
+  float desRVel = desRVelInput;
+
+  // _readEncoders();
+  int countL = _encoderCountL;
+  int countR = _encoderCountR;
+
+  // Measure wheel speeds
+  float speedL = 2.0 * _pi * (countL - _oldMotorPIDEncoderCountL) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  float speedR = 2.0 * _pi * (countR - _oldMotorPIDEncoderCountR) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+
+  // Check and correct for rollover
+  if (countL < 0 && _oldMotorPIDEncoderCountL > 0 && _oldMotorPIDEncoderCountL > 20000){
+    speedL = 2.0 * _pi * ((countL - (-32768)) - (32767 - _oldMotorPIDEncoderCountL)) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  }
+  if (countL > 0 && _oldMotorPIDEncoderCountL < 0 && _oldMotorPIDEncoderCountL < -20000){
+    speedL = 2.0 * _pi * ((32767 - countL) - (_oldMotorPIDEncoderCountL - (-32768))) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  }
+
+  if (countR < 0 && _oldMotorPIDEncoderCountR > 0 && _oldMotorPIDEncoderCountR > 20000){
+    speedR = 2.0 * _pi * ((countR - (-32768)) - (32767 - _oldMotorPIDEncoderCountR)) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  }
+  if (countR > 0 && _oldMotorPIDEncoderCountR < 0 && _oldMotorPIDEncoderCountR < -20000){
+    speedR = 2.0 * _pi * ((32767 - countR) - (_oldMotorPIDEncoderCountR - (-32768))) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  }
+
+  // Wheel speed smoothing
+  _wheelSpeedLBuffer[_speedBufferCount % 10] = speedL;
+  _wheelSpeedRBuffer[_speedBufferCount % 10] = speedR;
+
+  float wheelSpeedL = 0.0;
+  float wheelSpeedR = 0.0;
+
+  if (_speedBufferCount < 10){
+    for (int i = 0; i < _speedBufferCount; i++){
+      wheelSpeedL += _wheelSpeedLBuffer[i];
+      wheelSpeedR += _wheelSpeedRBuffer[i];
     }
-
-    if(millis() - _PIDMotorsTimeStart >= 3*timeStep){//There's been a large time delay, reset the timer and current encoder error
-      _PIDMotorsTimeStart = millis();                //to avoide integral windup.
-      _oldMotorPIDEncoderCountL = _encoderCountL;
-      _oldMotorPIDEncoderCountR = _encoderCountR;
+    wheelSpeedL = wheelSpeedL/(_speedBufferCount + 1);
+    wheelSpeedR = wheelSpeedR/(_speedBufferCount + 1);
+  }
+  else {
+    for (int i = 0; i < 10; i++){
+      wheelSpeedL += _wheelSpeedLBuffer[i];
+      wheelSpeedR += _wheelSpeedRBuffer[i];
     }
+    wheelSpeedL = wheelSpeedL/10.0;
+    wheelSpeedR = wheelSpeedR/10.0;
+  }
+  _wheelSpeedL = wheelSpeedL;
+  _wheelSpeedR = wheelSpeedR;
+  _speedBufferCount++;
 
-    if (millis() - _PIDMotorsTimeStart >= timeStep){
-      // _desVelR = (1-a)*_desVelR+a*desRVelInput;
-      // _desVelL = (1-a)*_desVelL+a*desLVelInput;
-      // float desLVel = _desVelL;
-      // float desRVel = _desVelR;
-      float desLVel = desLVelInput;
-      float desRVel = desRVelInput;
-      // float PIDTimeStep = (millis() - _PIDMotorsTimeStart)/1000;//Time step for controller to work on (s).
-      float PIDTimeStep = 0.01;
+  // // Error on individual motors for vel control
+  // float errorL = desLVel - 2.0 * _pi * (countL - _oldMotorPIDEncoderCountL) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  // float errorR = desRVel - 2.0 * _pi * (countR - _oldMotorPIDEncoderCountR) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  
+  // // Check and correct for rollover
+  // if (countL < 0 && _oldMotorPIDEncoderCountL > 0 && _oldMotorPIDEncoderCountL > 20000){
+  //   errorL = desLVel - 2.0 * _pi * ((countL - (-32768)) - (32767 - _oldMotorPIDEncoderCountL)) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  // }
+  // if (countL > 0 && _oldMotorPIDEncoderCountL < 0 && _oldMotorPIDEncoderCountL < -20000){
+  //   errorL = desLVel - 2.0 * _pi * ((32767 - countL) - (_oldMotorPIDEncoderCountL - (-32768))) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  // }
 
-      _readEncoders();
-      int countL = _encoderCountL;
-      int countR = _encoderCountR;
+  // if (countR < 0 && _oldMotorPIDEncoderCountR > 0 && _oldMotorPIDEncoderCountR > 20000){
+  //   errorR = desRVel - 2.0 * _pi * ((countR - (-32768)) - (32767 - _oldMotorPIDEncoderCountR)) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  // }
+  // if (countR > 0 && _oldMotorPIDEncoderCountR < 0 && _oldMotorPIDEncoderCountR < -20000){
+  //   errorR = desRVel - 2.0 * _pi * ((32767 - countR) - (_oldMotorPIDEncoderCountR - (-32768))) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
+  // }
 
-      // Error on individual motors for vel control
-      float errorL = desLVel - 2.0 * _pi * (countL - _oldMotorPIDEncoderCountL) / (_encoderCountsPerRotation * _motorGearRatio * PIDTimeStep);
-      float errorR = desRVel - 2.0 * _pi * (countR - _oldMotorPIDEncoderCountR) / (_encoderCountsPerRotation * _motorGearRatio * PIDTimeStep);
-      
-      // Check and correct for rollover
-      if (countL < 0 && _oldMotorPIDEncoderCountL > 0 && _oldMotorPIDEncoderCountL > 20000){
-        errorL = desLVel - 2.0 * _pi * ((countL - (-32768)) - (32767 - _oldMotorPIDEncoderCountL)) / (_encoderCountsPerRotation * _motorGearRatio * PIDTimeStep);
-      }
-      if (countL > 0 && _oldMotorPIDEncoderCountL < 0 && _oldMotorPIDEncoderCountL < -20000){
-        errorL = desLVel - 2.0 * _pi * ((32767 - countL) - (_oldMotorPIDEncoderCountL - (-32768))) / (_encoderCountsPerRotation * _motorGearRatio * PIDTimeStep);
-      }
+  float errorL = desLVel - speedL;
+  float errorR = desRVel - speedR;
 
-      if (countR < 0 && _oldMotorPIDEncoderCountR > 0 && _oldMotorPIDEncoderCountR > 20000){
-        errorR = desRVel - 2.0 * _pi * ((countR - (-32768)) - (32767 - _oldMotorPIDEncoderCountR)) / (_encoderCountsPerRotation * _motorGearRatio * PIDTimeStep);
-      }
-      if (countR > 0 && _oldMotorPIDEncoderCountR < 0 && _oldMotorPIDEncoderCountR < -20000){
-        errorR = desRVel - 2.0 * _pi * ((32767 - countR) - (_oldMotorPIDEncoderCountR - (-32768))) / (_encoderCountsPerRotation * _motorGearRatio * PIDTimeStep);
-      }
+  _integralL = _integralL + errorL * _PIDTimeStep;
+  _integralR = _integralR + errorR * _PIDTimeStep;
+  float diffL = (errorL - _oldErrorL) / _PIDTimeStep;
+  float diffR = (errorR - _oldErrorR) / _PIDTimeStep;
+  _oldErrorL = errorL;
+  _oldErrorR = errorR;
+  _oldMotorPIDEncoderCountL = countL;
+  _oldMotorPIDEncoderCountR = countR;
 
-      _integralL = _integralL + errorL * PIDTimeStep;
-      _integralR = _integralR + errorR * PIDTimeStep;
-      // float diffL = (_oldErrorL - errorL) / PIDTimeStep;
-      // float diffR = (_oldErrorR - errorR) / PIDTimeStep;
-      float diffL = (errorL - _oldErrorL) / PIDTimeStep;
-      float diffR = (errorR - _oldErrorR) / PIDTimeStep;
-      _oldErrorL = errorL;
-      _oldErrorR = errorR;
-      _oldMotorPIDEncoderCountL = countL;
-      _oldMotorPIDEncoderCountR = countR;
+  // _wheelSpeedL = desLVel - errorL;
+  // _wheelSpeedR = desRVel - errorR;
 
-      _wheelSpeedL = desLVel - errorL;
-      _wheelSpeedR = desRVel - errorR;
+  //Get rid of integral windup with feedback loop.
+  // if(_satR){
+  //   _motorR += int(_motorDigitalK*(_kpMotor*errorR + _kiMotor*(_integralR + _satRVal*_PIDTimeStep) + _kdMotor*diffR));
+  //   _satR = false;
+  // }
+  // else{
+  //   _motorR += int(_motorDigitalK*(_kpMotor*errorR + _kiMotor*_integralR + _kdMotor*diffR));
+  // }
 
+  // if(_satL){
+  //   _motorL += int(_motorDigitalK*(_kpMotor*errorL + _kiMotor*(_integralL + _satLVal*_PIDTimeStep) + _kdMotor*diffL));
+  //   _satL = false;
+  // }
+  // else{
+  //   _motorL += int(_motorDigitalK*(_kpMotor*errorL + _kiMotor*_integralL + _kdMotor*diffL));
+  // }
+  _motorR += int(_motorDigitalK*(_kpMotor*errorR + _kiMotor*_integralR + _kdMotor*diffR));
+  _motorL += int(_motorDigitalK*(_kpMotor*errorL + _kiMotor*_integralL + _kdMotor*diffL));
+  
+  //Check and deal with motor saturation.
+  if (_motorL>255){
+    _integralL -= (errorL*_PIDTimeStep); //Don't integrate at saturation
+    // _satLVal = (255 - _motorL);
+    // _satL = true;
+    _motorL=255;
+  }
+  if (_motorR>255){
+    _integralR -= (errorR*_PIDTimeStep); // Don't integrate at saturation
+    // _satRVal = (255 - _motorR);
+    // _satR = true;
+    _motorR=255;
+  }
+  if (_motorL<-255){
+    _integralL -= (errorL*_PIDTimeStep); // Don't integrate at saturation
+    // _satLVal = (-255 - _motorL);
+    // _satL = true;
+    _motorL=-255;
+  }
+  if (_motorR<-255){
+    _integralR -= (errorR*_PIDTimeStep); // Don't integrate at saturation
+    // _satRVal = (-255 - _motorR);
+    // _satR = true;
+    _motorR=-255;
+  }
 
-      //Get rid of integral windup with feedback loop.
-      if(_satR){
-        _motorR += int(_motorDigitalK*(_kpMotor*errorR + _kiMotor*(_integralR + _satRVal*PIDTimeStep) + _kdMotor*diffR));
-        _satR = false;
-      }
-      else{
-        _motorR += int(_motorDigitalK*(_kpMotor*errorR + _kiMotor*_integralR + _kdMotor*diffR));
-      }
-
-      if(_satL){
-        _motorL += int(_motorDigitalK*(_kpMotor*errorL + _kiMotor*(_integralL + _satLVal*PIDTimeStep) + _kdMotor*diffL));
-        _satL = false;
-      }
-      else{
-        _motorL += int(_motorDigitalK*(_kpMotor*errorL + _kiMotor*_integralL + _kdMotor*diffL));
-      }
-
-      if (abs(_motorL - _oldMotorL) > _maxMotorInc){ // Check for command that requires high acceleration
-        if(_motorL - _oldMotorL > 0){
-          _motorL = _oldMotorL + _maxMotorInc;
-        }else{
-          _motorL = _oldMotorL - _maxMotorInc;
-        }
-        
-      }
-
-      if (abs(_motorR - _oldMotorR) > _maxMotorInc){ // Check for command that requires high acceleration
-        if(_motorR - _oldMotorR > 0){
-          _motorR = _oldMotorR + _maxMotorInc;
-        }else{
-          _motorR = _oldMotorR - _maxMotorInc;
-        }
-      }
-
-      //Check and deal with motor saturation.
-      if (_motorL>255){
-        _integralL -= (errorL*PIDTimeStep); //Don't integrate at saturation
-        _satLVal = (255 - _motorL);
-        _satL = true;
-        _motorL=255;
-      }
-      if (_motorR>255){
-        _integralR -= (errorR*PIDTimeStep); // Don't integrate at saturation
-        _satRVal = (255 - _motorR);
-        _satR = true;
-        _motorR=255;
-      }
-      if (_motorL<-255){
-        _integralL -= (errorL*PIDTimeStep); // Don't integrate at saturation
-        _satLVal = (-255 - _motorL);
-        _satL = true;
-        _motorL=-255;
-      }
-      if (_motorR<-255){
-        _integralR -= (errorR*PIDTimeStep); // Don't integrate at saturation
-        _satRVal = (-255 - _motorR);
-        _satR = true;
-        _motorR=-255;
-      }
-
-      _oldMotorR = _motorR;
-      _oldMotorL = _motorL;
-
-      moveL(_motorL);
-      moveR(_motorR);
-
-      _PIDMotorsTimeStart = millis();
+  if (abs(_motorL - _oldMotorL) > _maxMotorInc){ // Check for command that requires high acceleration
+    if(_motorL - _oldMotorL > 0){
+      _motorL = _oldMotorL + _maxMotorInc;
     }
+    else{
+      _motorL = _oldMotorL - _maxMotorInc;
+    }
+    
+  }
+
+  if (abs(_motorR - _oldMotorR) > _maxMotorInc){ // Check for command that requires high acceleration
+    if(_motorR - _oldMotorR > 0){
+      _motorR = _oldMotorR + _maxMotorInc;
+    }
+    else{
+      _motorR = _oldMotorR - _maxMotorInc;
+    }
+  }
+
+  _oldMotorR = _motorR;
+  _oldMotorL = _motorL;
+
+  // _wheelSpeedL = _motorL;
+  // _wheelSpeedR = _motorR;
+
+  // _ISRElapsedTime = 2.0;
+  // moveL(_motorL);
+  // moveR(_motorR);
+
 }
 
 ///////////////////////////////////////////////////////////
