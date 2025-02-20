@@ -54,8 +54,8 @@ print_end "$STR"
 STR="INSTALLING PYTHON AND DEPS"
 print_start "$STR"
 sudo apt-get install -y python3-pip git
-sudo python3 -m pip install pyserial
-sudo python3 -m pip install netifaces
+sudo pip3 install pyserial
+sudo pip3 install netifaces
 print_end "$STR"
 
 STR="CLONING GIT REPOS"

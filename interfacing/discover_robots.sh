@@ -1,0 +1,1 @@
+sudo python3 get_ip_by_mac.py ../config/mac_list.json en0 discover
