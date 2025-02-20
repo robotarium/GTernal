@@ -60,8 +60,8 @@ print_end "$STR"
 STR="INSTALLING PYTHON AND DEPS"
 print_start "$STR"
 sudo apt-get install -y python3-pip git
-sudo pip3 install pyserial --break-system-packages
-sudo pip3 install netifaces --break-system-packages
+sudo pip3 install pyserial
+sudo pip3 install netifaces
 print_end "$STR"
 
 STR="CLONING GIT REPOS"
@@ -71,6 +71,14 @@ cd /home/pi
 mkdir git
 sudo chown -R pi:pi git
 cd git
-# git clone https://github.com/robotarium/GTernal
+git clone https://github.com/robotarium/GTernal
 git clone https://github.com/robotarium/mac_discovery
+print_end "$STR"
+
+STR="STARTING CONTAINERS"
+print_start "$STR"
+cd /home/pi/git/GTernal/docker
+sudo ./docker_watch.sh
+cd /home/pi/git/mac_discovery/docker
+sudo ./docker_run.sh
 print_end "$STR"

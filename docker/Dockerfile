@@ -11,11 +11,14 @@ RUN apk add --no-cache git python3 python3-dev py3-pip gcc musl-dev linux-header
 # Get ssh and sshpass for shutting down the Raspberry Pi within a Docker container
 RUN apk add --update --no-cache openssh sshpass
 
+# Install cvxopt for local barriers
+RUN python3 -m pip install numpy scipy cvxopt --user --break-system-packages
+
 # Install Vizier
 ADD https://api.github.com/repos/robotarium/vizier/git/refs/heads/master version.json
 RUN git clone https://github.com/robotarium/vizier
-RUN cd vizier && pip3 install .
+RUN cd vizier && pip3 install .  --break-system-packages
 
 # Install firmware
 COPY . /GTernal
-RUN cd GTernal && pip3 install .
+RUN cd GTernal && pip3 install . --break-system-packages

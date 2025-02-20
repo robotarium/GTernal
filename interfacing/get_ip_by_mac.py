@@ -75,9 +75,12 @@ def main():
     elif args.command == 'setup':
         cmds = [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../setup/setup', 'pi@'+x+':/home/pi'] for x in id_to_ip.values()]
         _ = [cmds.append(['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo ./setup']) for x in id_to_ip.values()]
-    elif args.command == 'setup_local':
+    elif args.command == 'setup_base_image':
         cmds = [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '-r', '../../GTernal/', 'pi@'+x+':/home/pi/git'] for x in id_to_ip.values()]
-        _ = [cmds.append(['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo ./setup_local']) for x in id_to_ip.values()]
+        _ = [cmds.append(['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo ../setup/setup_base_image']) for x in id_to_ip.values()]
+    elif args.command == 'setup_from_base':
+        cmds = [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '-r', '../../GTernal/', 'pi@'+x+':/home/pi/git'] for x in id_to_ip.values()]
+        _ = [cmds.append(['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo ../setup/setup_from_base']) for x in id_to_ip.values()]
 
     pids = []
     for cmd in cmds:
@@ -92,6 +95,12 @@ def main():
         cmds = []
         _ = [cmds.append(['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../config/mac_list.json', 'pi@'+x+':/home/pi/git/GTernal/config']) for x in id_to_ip.values()]
         _ = [cmds.append(['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../docker/docker_run.sh', 'pi@'+x+':/home/pi/git/GTernal/docker']) for x in id_to_ip.values()]
+        _ = [cmds.append(['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo reboot']) for x in id_to_ip.values()]
+
+    elif args.command == 'setup_base_image':
+        cmds = []
+        _ = [cmds.append(['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../config/mac_list.json', 'pi@'+x+':/home/pi/git/GTernal/config']) for x in id_to_ip.values()]
+        _ = [cmds.append(['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../docker/docker_run_local.sh', 'pi@'+x+':/home/pi/git/GTernal/docker']) for x in id_to_ip.values()]
         _ = [cmds.append(['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', 'pi@'+x, 'sudo reboot']) for x in id_to_ip.values()]
 
         pids = []

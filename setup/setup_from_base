@@ -11,12 +11,9 @@ print_end() {
 	echo "$DEL ""$FIN ""$1"" $DEL"	
 }
 
-STR="STARTING CONTAINERS"
+STR="STARTING FIRMWARE CONTAINER"
 print_start "$STR"
 cd /home/pi/git/GTernal/docker
-sudo ./docker_run.sh
-sudo ./docker_watch.sh
-cd /home/pi/git/mac_discovery/docker
 sudo ./docker_run.sh
 print_end "$STR"
 
