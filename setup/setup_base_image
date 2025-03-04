@@ -59,17 +59,29 @@ print_end "$current_step"
 
 current_step="INSTALLING DOCKER"
 print_start "$current_step"
-sudo apt-get remove docker docker-engine docker.io
-curl -fsSL get.docker.com -o get-docker.sh && export VERSION=23.0 && sh get-docker.sh
+for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove -y $pkg || true; done
+sudo apt-get update > /dev/null 2>&1
+sudo apt-get install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update > /dev/null 2>&1
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo usermod -aG docker pi
 print_end "$current_step"
 
-current_step="ADDING LOCAL DOCKER REGISTRY"
-print_start "$current_step"
-# sudo echo '{"insecure-registries":["192.168.1.8:9000"]}' >> /etc/docker/daemon.json
-sudo bash -c "echo '{\"insecure-registries\":[\"$LOCAL_DOCKER_REGISTRY\"]}' > /etc/docker/daemon.json"
-sudo service docker restart
-print_end "$current_step"
+if [ -n "$LOCAL_DOCKER_REGISTRY" ]; then
+	current_step="ADDING LOCAL DOCKER REGISTRY"
+	print_start "$current_step"
+	# sudo echo '{"insecure-registries":["192.168.1.8:9000"]}' >> /etc/docker/daemon.json
+	sudo bash -c "echo '{\"insecure-registries\":[\"$LOCAL_DOCKER_REGISTRY\"]}' > /etc/docker/daemon.json"
+	sudo service docker restart
+	print_end "$current_step"
+fi
 
 current_step="INSTALLING PYTHON AND DEPS"
 print_start "$current_step"
@@ -101,4 +113,14 @@ cd /home/pi/git/mac_discovery/docker
 sudo ./docker_run.sh
 print_end "$current_step"
 
+STR="REMOVING SETUP SCRIPTS"
+print_start "$STR"
+rm /home/pi/setup_base_image
+rm /home/pi/env_variables.sh
+print_end "$STR"
+
 print_end "SETTING UP BASE IMAGE"
+
+STR="REBOOTING TO APPLY SETTINGS"
+print_start "$STR"
+sudo reboot
