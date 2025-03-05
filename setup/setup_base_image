@@ -97,8 +97,8 @@ cd /home/pi
 mkdir git
 sudo chown -R pi:pi git
 cd git
-git clone -b $FIRMWARE_REPO_BRANCH $FIRMWARE_REPO_URL
-git clone https://github.com/robotarium/mac_discovery
+sudo -u pi git clone -b $FIRMWARE_REPO_BRANCH $FIRMWARE_REPO_URL
+sudo -u pi git clone https://github.com/robotarium/mac_discovery
 print_end "$current_step"
 
 current_step="STARTING WATCHTOWER CONTAINER"
