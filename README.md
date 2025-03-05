@@ -17,9 +17,10 @@
 6. Click the upload icon (right arrow icon).
 
 # 2 - Make the Base Image for Raspberry Pi
+## 1 - Install Raspberry Pi OS on an SD Card
 1. Install and run the Raspberry Pi Imager (https://www.raspberrypi.com/software/). The instuction is for Raspberry Pi Imager v.1.8.5
 2. For 'Raspberry Pi Device,' select the version of the Pi used.
-3. For 'Operating System,' select 'Raspberry Pi OS (other)' and select 'Raspberry Pi OS Lite (64-bit).' For Raspberry Pi Zero 1s, select 'Raspberry Pi OS Lite (32-bit)'
+3. For 'Operating System,' select 'Raspberry Pi OS (other)' and select 'Raspberry Pi OS (Legacy, 64-bit) Lite.' For Raspberry Pi Zero 1s, select 'Raspberry Pi OS (Legacy, 32-bit) Lite'
 4. For 'Storage,' choose the micro-SD card to be used.
 5. Click 'NEXT' and 'EDIT SETTINGS.' 
 6. Under 'GENERAL' tab, check 'Set username and password' and type 'pi' for the 'Username' and 'raspberry' for 'Password.'
@@ -27,9 +28,63 @@
 8. Change 'Wireless LAN country' to 'US.' 'Set locale settings' is optional.
 9. Under 'SERVICES' tab, check 'Enable SSH' and 'Use password authentication'
 9. Click 'SAVE' and click 'YES.'
-10. Produce as many micro-SD cards as the number of robots to be built.
+<!-- 10. Produce as many micro-SD cards as the number of robots to be built. -->
 > [!NOTE]
 > Whenever the Raspberry Pi Imager is restarted, make sure to re-type the passwords for the Pi and the Wifi. The Raspberry Pi Imager seems to be ruining the passwords saved in the advanced setting when the program is restarted even if the 'Image customization options' is set to 'to always use.'
+
+## 2 - Setup the Base Image
+1. Insert the SD card from the previous step into a Raspberry Pi and power it on. It should automatically connect to the wifi specified in Step 2.1.7. The Pi needs some time to boot for the first time.
+2. Identify the MAC address of the Raspberry Pi. On a Linux comptuer, this can be done by running
+    ```
+    sudo arp-scan -I <network-device-name> -l -t 100 -r 5
+    ```
+Alternatively, you can navigate to the router settings page (typically '192.168.1.1' or '10.0.0.1') using a web browser. The new Pi will appear as 'RASPBERRYPI.'
+3. Add the MAC address to 'path-to-parent-directory/GTernal/interfacing/mac_list.json' file as
+    ```
+    "<MAC-address-of-Pi>":"base_image"
+    ```
+    e.g., "{
+            d8:3a:dd:bc:0c:3c":"base_image
+           }"
+2. On your computer, run
+    ```
+    cd <path-to-parent-directory>/GTernal/interfacing
+    ./setup.sh setup_base_image
+    ```
+    This will automatically setup the SD card as the base image. Wait for 'DONE SETTING UP BASE IMAGE' message on the terminal.
+3. Shutdown the Pi by running
+    ```
+    cd <path-to-parent-directory>/GTernal/interfacing
+    ./shutdown_robots.sh 1 base_image
+    ```
+4. Remove the SD card from the Pi and insert it to your computer.
+5. On your computer, identify the name of the SD card by running
+    ```
+    sudo fdisk -l
+    ```
+    The device name will be something like '/dev/sdb'. Look for the device with the storage size that matches the capacity of the SD card.
+6. Create the image of the SD card on your computer by running
+    ```
+    sudo dd if=<name-of-the-sd-card> of=<desired-directory>/GTernal_base_image.img
+    ```
+    e.g., sudo dd if=/dev/sdb of=~/GTernal_base_image.img
+7. Shrink the base image by running
+    ```
+    wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
+
+    chmod +x ./pishrink.sh
+
+    sudo ./pishrink.sh <path-to-the-base-image>/GTernal_base_image.img
+    ```
+    e.g., sudo ./pishrink.sh ~/GTernal_base_image.img
+8. Load as many SD cards as needed with the base image. Insert a new SD card to the computer, and perform step 2.2.5 to identify the name of the SD card to be written. Then, run
+    ```
+    sudo dd if=<path-to-the-base-image>/GTernal_base_image.img of=<name-of-the-sd-card>
+    ```
+    e.g., sudo dd if=~/GTernal_base_image.img of=/dev/sdb
+
+> [!NOTE]
+> More detailed instructions can be found here: https://beebom.com/how-clone-raspberry-pi-sd-card-windows-linux-macos/
 
 <!-- ## 2 - Setup the RPi
 1. Eject the micro-SD card from the computer and insert it onto a Raspberry Pi and power it up.
@@ -76,7 +131,7 @@ This section assumes that:
 > Check if the Pi and Teensy are connected through UART. If the Pi is not connected with a programmed Teensy as instructed in Step 1, the firmware will not be started by the setup script properly in the following steps.
 3. Only the new robots to be setup are connected to the WiFi.
 > [!IMPORTANT]
-> The current automatic setup script looks for all robots with the MAC addresses specified in 'GTernal/config/mac_list.json' file and starts the setup process for the robots. Therefore, it will start the setup process even for the robots already with the firmware installed if they are connected to the WiFi. Since this may cause problems for the existing robots, t is recommended to only turn on the new robots to be set up.
+> The current automatic setup script looks for all robots with the MAC addresses specified in 'GTernal/config/mac_list.json' file and starts the setup process for the robots. Therefore, it will start the setup process even for the robots already with the firmware installed if they are connected to the WiFi. Since this may cause problems for the existing robots, it is recommended to only turn on the new robots to be set up.
 <!-- ## 1 - Repository Setup
 During the setup process, each robot runs an automatic setup script which clones the firmware from a GitHub repository. By default, the setup script clones the official GTernal repository. This needs to be changed to clone your repository with updated configuration files.
 

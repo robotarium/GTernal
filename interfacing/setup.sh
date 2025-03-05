@@ -3,9 +3,9 @@ if [[ -z $1 ]]; then
     exit 1
 fi
 
-if [[ $2 -eq 0 ]] ; then
+if [[ $1 != 'setup_base_image' && -z $2 ]] ; then
     echo 'Please provide the number of new robots to be setup.'
-    exit 0
+    exit 1
 fi
 
 # Automatically get the network device name with IP starting with 192. or 10.
@@ -46,4 +46,12 @@ fi
 
 echo "Selected Network Interface: $INTERFACE"
 
-sudo python3 get_ip_by_mac.py ../config/mac_list.json $INTERFACE $1 -n $2
+# Construct the command to run get_ip_by_mac.py
+if [[ $1 == 'setup_base_image' ]]; then
+    CMD="sudo python3 get_ip_by_mac.py ../config/mac_list.json $INTERFACE $1 -n 1"
+else
+    CMD="sudo python3 get_ip_by_mac.py ../config/mac_list.json $INTERFACE $1 -n $2"
+fi
+
+# Execute the constructed command
+eval $CMD

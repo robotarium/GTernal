@@ -26,14 +26,14 @@ print_end() {
 
 current_step="UPDATING GTERNAL REPO"
 print_start "$current_step"
-cd /home/pi/git
+cd /home/pi/git/GTernal
 git pull origin $FIRMWARE_REPO_BRANCH
 print_end "$current_step"
 
 current_step="STARTING FIRMWARE CONTAINER"
 print_start "$current_step"
 cd /home/pi/git/GTernal/docker
-sudo ./docker_run_local.sh
+sudo ./docker_run.sh
 print_end "$current_step"
 
 current_step="SETTING UP NETWORK HOST NAME"
