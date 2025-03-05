@@ -38,7 +38,7 @@
     ```
     sudo arp-scan -I <network-device-name> -l -t 100 -r 5
     ```
-Alternatively, you can navigate to the router settings page (typically '192.168.1.1' or '10.0.0.1') using a web browser. The new Pi will appear as 'RASPBERRYPI.'
+    Alternatively, you can navigate to the router settings page (typically '192.168.1.1' or '10.0.0.1') using a web browser. The new Pi will appear as 'RASPBERRYPI.'
 3. Add the MAC address to 'path-to-parent-directory/GTernal/interfacing/mac_list.json' file as
     ```
     "<MAC-address-of-Pi>":"base_image"
@@ -46,29 +46,29 @@ Alternatively, you can navigate to the router settings page (typically '192.168.
     e.g., "{
             d8:3a:dd:bc:0c:3c":"base_image
            }"
-2. On your computer, run
+4. On your computer, run
     ```
     cd <path-to-parent-directory>/GTernal/interfacing
     ./setup.sh setup_base_image
     ```
     This will automatically setup the SD card as the base image. Wait for 'DONE SETTING UP BASE IMAGE' message on the terminal.
-3. Shutdown the Pi by running
+5. Shutdown the Pi by running
     ```
     cd <path-to-parent-directory>/GTernal/interfacing
     ./shutdown_robots.sh 1 base_image
     ```
-4. Remove the SD card from the Pi and insert it to your computer.
-5. On your computer, identify the name of the SD card by running
+6. Remove the SD card from the Pi and insert it to your computer.
+7. On your computer, identify the name of the SD card by running
     ```
     sudo fdisk -l
     ```
     The device name will be something like '/dev/sdb'. Look for the device with the storage size that matches the capacity of the SD card.
-6. Create the image of the SD card on your computer by running
+8. Create the image of the SD card on your computer by running
     ```
     sudo dd if=<name-of-the-sd-card> of=<desired-directory>/GTernal_base_image.img
     ```
     e.g., sudo dd if=/dev/sdb of=~/GTernal_base_image.img
-7. Shrink the base image by running
+9. Shrink the base image by running
     ```
     wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
 
@@ -77,7 +77,7 @@ Alternatively, you can navigate to the router settings page (typically '192.168.
     sudo ./pishrink.sh <path-to-the-base-image>/GTernal_base_image.img
     ```
     e.g., sudo ./pishrink.sh ~/GTernal_base_image.img
-8. Load as many SD cards as needed with the base image. Insert a new SD card to the computer, and perform step 2.2.5 to identify the name of the SD card to be written. Then, run
+10. Load as many SD cards as needed with the base image. Insert a new SD card to the computer, and perform step 2.2.5 to identify the name of the SD card to be written. Then, run
     ```
     sudo dd if=<path-to-the-base-image>/GTernal_base_image.img of=<name-of-the-sd-card>
     ```
