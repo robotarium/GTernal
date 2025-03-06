@@ -105,7 +105,9 @@ def main():
     #     cmds = [(robot_id, [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../setup/setup_base_image', f'pi@{ip}:/home/pi'],
     #                         ['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo /home/pi/git/GTernal/setup/setup_from_base']]) for robot_id, ip in id_to_ip.items()]
     elif args.command == 'setup_from_base':
-        cmds = [(robot_id, [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo /home/pi/git/GTernal/setup/setup_from_base.sh']]) for robot_id, ip in id_to_ip.items()]
+        cmds = [(robot_id, [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo rm -f /home/pi/git/GTernal/config/mac_list.json'],
+                            ['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../config/mac_list.json', f'pi@{ip}:/home/pi/git/GTernal/config'],
+                            ['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo /home/pi/git/GTernal/setup/setup_from_base.sh']]) for robot_id, ip in id_to_ip.items()]
 
     # pids = []
     # for cmd in cmds:

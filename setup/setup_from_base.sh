@@ -24,11 +24,11 @@ print_end() {
 	echo "$DEL ""$FIN ""$1"" $DEL"	
 }
 
-current_step="UPDATING GTERNAL REPO"
-print_start "$current_step"
-cd /home/pi/git/GTernal
-git pull --rebase origin $FIRMWARE_REPO_BRANCH
-print_end "$current_step"
+# current_step="UPDATING GTERNAL REPO"
+# print_start "$current_step"
+# cd /home/pi/git/GTernal
+# git pull --rebase origin $FIRMWARE_REPO_BRANCH
+# print_end "$current_step"
 
 current_step="STARTING FIRMWARE CONTAINER"
 print_start "$current_step"
