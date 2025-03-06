@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /home/pi/git/GTernal/setup/env_variables.sh
+source /home/pi/git/GTernal/config/env_variables.sh
 
 # Exit immediately if a command exits with a non-zero status
 set -e
@@ -27,7 +27,7 @@ print_end() {
 current_step="UPDATING GTERNAL REPO"
 print_start "$current_step"
 cd /home/pi/git/GTernal
-git pull origin $FIRMWARE_REPO_BRANCH
+git pull --rebase origin $FIRMWARE_REPO_BRANCH
 print_end "$current_step"
 
 current_step="STARTING FIRMWARE CONTAINER"

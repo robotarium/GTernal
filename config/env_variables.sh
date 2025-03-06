@@ -5,6 +5,7 @@ export FIRMWARE_REPO_URL=https://github.com/${FIRMWARE_REPO_USERNAME}/${FIRMWARE
 export FIRMWARE_REPO_BRANCH=setup_test
 
 # Docker Hub Repository for the Firmware
+# This will not be used if LOCAL_DOCKER_REGISTRY is set
 export DOCKER_HUB_REPO_USERNAME=skim743
 export DOCKER_HUB_REPO_NAME=firmware
 

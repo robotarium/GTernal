@@ -120,7 +120,3 @@ rm /home/pi/env_variables.sh
 print_end "$STR"
 
 print_end "SETTING UP BASE IMAGE"
-
-# STR="REBOOTING TO APPLY SETTINGS"
-# print_start "$STR"
-# sudo reboot

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Use the detect_serial module to get the correct serial port
-source ../setup/env_variables.sh
+source ../config/env_variables.sh
 
 # Determine the Docker image to use
 if [ -n "$LOCAL_DOCKER_REGISTRY" ]; then
