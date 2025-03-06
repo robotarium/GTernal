@@ -115,7 +115,7 @@ print_end "$current_step"
 
 STR="REMOVING SETUP SCRIPTS"
 print_start "$STR"
-rm /home/pi/setup_base_image
+rm /home/pi/setup_base_image.sh
 rm /home/pi/env_variables.sh
 print_end "$STR"
 
