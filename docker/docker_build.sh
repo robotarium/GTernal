@@ -4,7 +4,6 @@
 # related to the multi-platform build feature.
 sudo docker run --rm --privileged multiarch/qemu-user-static --reset -p yes -c yes
 
-# Use the detect_serial module to get the correct serial port
 source ../config/env_variables.sh
 
 # Docker build command

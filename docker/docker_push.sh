@@ -1,4 +1,5 @@
 #!/bin/bash
 
-docker tag gternal:firmware skim743/firmware
-docker push skim743/firmware
+source ../config/env_variables.sh
+docker tag gternal:firmware $DOCKER_HUB_REPO_USERNAME/$DOCKER_HUB_REPO_NAME
+docker push $DOCKER_HUB_REPO_USERNAME/$DOCKER_HUB_REPO_NAME
