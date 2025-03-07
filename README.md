@@ -12,7 +12,7 @@ During the setup process, each robot runs an automatic setup script which clones
 # 2 - Program Teensy
 1. Install Teensyduino (https://www.pjrc.com/teensy/td_download.html)
 2. Copy and paste all library folders in `GTernal/firmware/Teensy/libraries` to `Arduino/libraries`
-   > [!NOTE]
+   > **[!NOTE]**
    > The absolute path for the `Arduino/libraries` directory is OS dependent, and this can be found here: https://support.arduino.cc/hc/en-us/articles/4412950938514-Open-the-Sketchbook
     
    > [!NOTE]
