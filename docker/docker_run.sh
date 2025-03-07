@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Use the detect_serial module to get the correct serial port
 source ../config/env_variables.sh
 
 # Determine the Docker image to use
@@ -10,6 +9,7 @@ else
     DOCKER_IMAGE="$DOCKER_HUB_REPO_USERNAME/$DOCKER_HUB_REPO_NAME"
 fi
 
+# Use the detect_serial module to get the correct serial port
 docker run -d \
 	   --restart unless-stopped \
 	   --name firmware \
