@@ -128,8 +128,40 @@ This section assumes that:
 > [!WARNING]
 > The current automatic setup script looks for all robots with the MAC addresses specified in 'GTernal/config/mac_list.json' file and starts the setup process for the robots. Therefore, it will start the setup process even for the robots already with the firmware installed if they are connected to the WiFi. Since this may cause problems for the existing robots, it is advised to only turn on the new robots to be set up.
 
+## 1 - Firmware Docker Image Setup
+The "docker_run.sh" script makes each robot pull the firmware image from either Docker Hub of a local Docker registry instead of building the firmware docker image directly on each robot. This saves a lot of time when building multiple robots. Also, with "v2tec/watchtower" image running on the robots, each robot downloads and runs the newest firmware image uploaded to the Docker Hub automatically. Therefore, it is unnecessary to manually update the firmware of each robot when a new firmware image is built and pushed to Docker Hub/local Docker registry.
 
-## 1 - Automatic Installation
+### 1 - Building the Firware Image
+
+1. Inspect and update the environment variables in `config/env_variables.sh`
+2. Run
+    ```
+    ./docker_build
+    ```
+
+### 2 - Tag the image and push it to a Docker registry
+
+#### 2.1 - Docker Hub (Online)
+1. Log into the Docker Hub with
+    ```
+    docker login
+    ```
+2. Run
+    ```
+    ./docker_push.sh
+    ```
+
+#### 2.2 - Local Docker registry (Local)
+1. Start a local Docker registry
+    ```
+    ./docker_registry.sh
+    ```
+2. Run
+    ```
+    ./docker_push_local.sh
+    ```
+
+## 2 - Robot Setup
 <!-- > [!IMPORTANT]
 > It is recommended to only turn on the new robots to be set up. The current automatic setup script looks for all robots with the MAC addresses specified in 'GTernal/config/mac_list.json' file and starts the setup process for the robots. Therefore, it will start the setup process even for the robots already with the firmware installed if they are connected to the WiFi. Since this may cause problems for the existing robots, it is recommended to only turn on the new robots that need to be set up. -->
 1. Insert the loaded micro-SD cards to the robots' Raspberry Pis and power the robots up using the switch on each PCB. They should automatically connect to the wifi specified in Step 3.7.
