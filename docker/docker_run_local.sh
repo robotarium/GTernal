@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Use the detect_serial module to get the correct serial port
+source ../setup/env_variables.sh
 docker run -d \
 	   --restart unless-stopped \
 	   --name firmware \
