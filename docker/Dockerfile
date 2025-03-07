@@ -1,14 +1,4 @@
-# Lines 3 and 5 are needed for building the image on a computer (x86) instead on a Raspberry Pi
-# Comment the two lines below if you are directly building the image on a Raspberry Pi
-# FROM multiarch/qemu-user-static:x86_64-arm AS qemu
 FROM arm64v8/ubuntu:jammy
-# COPY --from=qemu /usr/bin/qemu-arm-static /usr/bin
-
-# # Source the environment variables
-# COPY ../setup/env_variables.sh /tmp/env_variables.sh
-# RUN . /tmp/env_variables.sh && \
-#     echo "export FIRMWARE_REPO_URL=$FIRMWARE_REPO_URL" >> /etc/environment && \
-#     echo "export FIRMWARE_REPO_BRANCH=$FIRMWARE_REPO_BRANCH" >> /etc/environment
 
 # Load environment variables
 ARG FIRMWARE_REPO_USERNAME
