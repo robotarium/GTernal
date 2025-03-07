@@ -12,15 +12,15 @@ During the setup process, each robot runs an automatic setup script which clones
 # 2 - Program Teensy
 1. Install Teensyduino (https://www.pjrc.com/teensy/td_download.html)
 2. Copy and paste all library folders in `GTernal/firmware/Teensy/libraries` to `Arduino/libraries`
->>>> **[!NOTE]**
->>>> The absolute path for the `Arduino/libraries` directory is OS dependent, and this can be found here: https://support.arduino.cc/hc/en-us/articles/4412950938514-Open-the-Sketchbook
+> **[!NOTE]**
+> The absolute path for the `Arduino/libraries` directory is OS dependent, and this can be found here: https://support.arduino.cc/hc/en-us/articles/4412950938514-Open-the-Sketchbook
     
-   > [!NOTE]
-   > The firmware for Teensy requires ArduinoJson 5.13 which is included in `GTernal/firmware/Teensy/libraries.`
-   > ArduinoJson 6 is currently not compatible with the firmware.
+> [!NOTE]
+> The firmware for Teensy requires ArduinoJson 5.13 which is included in `GTernal/firmware/Teensy/libraries.`
+> ArduinoJson 6 is currently not compatible with the firmware.
 3. Connect a Teensy to the computer using a micro-USB cable.
-   > [!NOTE]
-   > The micro-USB cable needs to be directly connected to the Teensy and not the micro-USB port on the robot PCB.
+> [!NOTE]
+> The micro-USB cable needs to be directly connected to the Teensy and not the micro-USB port on the robot PCB.
 4. Run Teensyduino and open `defaultOperation.ino` located in `GTernal/firmware/defaultOperation` directory.
 5. Select the Teensy board to be flashed under `Tools > Port`
 6. Click the upload icon (right arrow icon).
@@ -37,8 +37,8 @@ During the setup process, each robot runs an automatic setup script which clones
 8. Change 'Wireless LAN country' to 'US.' 'Set locale settings' is optional.
 9. Under 'SERVICES' tab, check 'Enable SSH' and 'Use password authentication'
 10. Click 'SAVE' and click 'YES.'
-    > [!NOTE]
-    > Whenever the Raspberry Pi Imager is restarted, make sure to re-type the passwords for the Pi and the Wifi. The Raspberry Pi Imager seems to be ruining the passwords saved in the advanced setting when the program is restarted even if the 'Image customization options' is set to 'to always use.'
+> [!NOTE]
+> Whenever the Raspberry Pi Imager is restarted, make sure to re-type the passwords for the Pi and the Wifi. The Raspberry Pi Imager seems to be ruining the passwords saved in the advanced setting when the program is restarted even if the 'Image customization options' is set to 'to always use.'
 
 ## 2 - Setup the Base Image
 1. Insert the SD card from the previous step into a Raspberry Pi and power it on. It should automatically connect to the wifi specified in Step 2.1.7. The Pi needs some time to boot for the first time.
@@ -72,8 +72,8 @@ During the setup process, each robot runs an automatic setup script which clones
     sudo fdisk -l
     ```
     The device name will be something like '/dev/sdb'. Look for the device with the storage size that matches the capacity of the SD card.
-   > [!NOTE]
-   > You must enter the device name without any numbers. For example, if you see '/dev/sdb1' and '/dev/sdb2', the device name is `/dev/sdb`.
+> [!NOTE]
+> You must enter the device name without any numbers. For example, if you see '/dev/sdb1' and '/dev/sdb2', the device name is `/dev/sdb`.
 8. Create the image of the SD card on your computer by running
     ```
     sudo dd if=<name-of-the-sd-card> of=<desired-directory>/GTernal_base_image.img
@@ -122,11 +122,11 @@ During the setup process, each robot runs an automatic setup script which clones
 This section assumes that:
 1. You have micro-SD cards loaded as detailed in the previous section.
 2. You have fully assembled robots.
-   > [!NOTE]
-   > Check if the Pi and Teensy are connected through UART. If the Pi is not connected with a programmed Teensy as instructed in Step 1, the firmware will not be started by the setup script properly in the following steps.
+> [!NOTE]
+> Check if the Pi and Teensy are connected through UART. If the Pi is not connected with a programmed Teensy as instructed in Step 1, the firmware will not be started by the setup script properly in the following steps.
 3. Only the new robots to be setup are connected to the WiFi.
-   > [!WARNING]
-   > The current automatic setup script looks for all robots with the MAC addresses specified in 'GTernal/config/mac_list.json' file and starts the setup process for the robots. Therefore, it will start the setup process even for the robots already with the firmware installed if they are connected to the WiFi. Since this may cause problems for the existing robots, it is advised to only turn on the new robots to be set up.
+> [!WARNING]
+> The current automatic setup script looks for all robots with the MAC addresses specified in 'GTernal/config/mac_list.json' file and starts the setup process for the robots. Therefore, it will start the setup process even for the robots already with the firmware installed if they are connected to the WiFi. Since this may cause problems for the existing robots, it is advised to only turn on the new robots to be set up.
 
 
 ## 1 - Automatic Installation
@@ -142,13 +142,13 @@ This section assumes that:
 
     Check if the number of Raspberry Pis found by the above command matches the total number of Raspberry Pis being set up. Wait a few more minutes and check again if not all Pis show up in the list.
 
-   > [!NOTE]
-   > The \<network-device-name\> can be found by running 'ifconfig' command into the terminal. There may be multiple network devices on your computer. The right device is the one connected to the same WiFi network as the Raspberry Pis. Typically, the local IP address assigned by a network router is '192.168.x.x' or '10.0.x.x.'
+> [!NOTE]
+> The \<network-device-name\> can be found by running 'ifconfig' command into the terminal. There may be multiple network devices on your computer. The right device is the one connected to the same WiFi network as the Raspberry Pis. Typically, the local IP address assigned by a network router is '192.168.x.x' or '10.0.x.x.'
 
 3. Assign an unallocated robot ID# for the MAC address of a Raspberry Pi found in the previous step. Then, add/replace the robot ID# and the MAC address of the Raspberry Pi in 'GTernal/config/mac_list.json'
 
-   > [!NOTE]
-   > When assigning an index to a new robot, assign an Aruco tag ID or the ID engraved on a Vicon hat plate. Make sure not to use any numbers that are already assigned to other robots. The lasercutting design files for the Vicon hats can be found in `GTernal/GTernal_design_files`
+> [!NOTE]
+> When assigning an index to a new robot, assign an Aruco tag ID or the ID engraved on a Vicon hat plate. Make sure not to use any numbers that are already assigned to other robots. The lasercutting design files for the Vicon hats can be found in `GTernal/GTernal_design_files`
 
 <!-- 4. Replace lines 12 and 13 in 'GTernal/docker/docker_run.sh' with the IP address and port of the MQTT host.
 
@@ -164,8 +164,8 @@ This section assumes that:
 
     When prompted 'Enter secrets for robots,' enter the password for the Raspberry Pis, 'raspberry'
 
-    > [!NOTE]
-    > The config/mac_list.json file of the robots will be updated to the config/mac_list.json file on your computer via SCP.
+> [!NOTE]
+> The config/mac_list.json file of the robots will be updated to the config/mac_list.json file on your computer via SCP.
 
 <!-- 5. Update the 'mac_list.json' file on the robots by running
 ```
