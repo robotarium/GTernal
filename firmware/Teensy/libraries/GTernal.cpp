@@ -70,7 +70,7 @@ void GTernal::SETUP(){
   // VL53L4CD Setup
   ///////////////////////////////////////////////////////////
   // Configure VL53L4CD satellite component.
-  // for (uint8_t x = 0 ; x <= NUMBER_OF_SENSORS ; x++)
+  // for (byte x = 0 ; x <= _NUMBER_OF_SENSORS ; x++)
   // {
   //   enableMuxPort(x); //Tell mux to connect to port X
   //   sensor_vl53l4cd_sat.begin();
@@ -352,7 +352,7 @@ void GTernal::rainbow(uint8_t wait) {
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
-uint32_t GTernal::_wheel(uint8_t wheelPos) {
+uint32_t GTernal::_wheel(byte wheelPos) {
   wheelPos = 255 - wheelPos;
   if(wheelPos < 85) {
     return _strip.Color(255 - wheelPos * 3, 0, wheelPos * 3, 0);
@@ -410,7 +410,7 @@ void GTernal::enableMuxPort(uint8_t port){
 void GTernal::measureDistances(JsonArray& outputArray){
   array<VL53L4CD_Result_t, 7> sensorOutputs;
   
-  for(uint8_t x = 0 ; x <= _NUMBER_OF_SENSORS ; x++){
+  for(byte x = 0 ; x <= _NUMBER_OF_SENSORS ; x++){
       // (Mandatory) Clear HW interrupt to restart measurements
       enableMuxPort(x); //Tell mux to connect to port X
       sensor_vl53l4cd_sat.VL53L4CD_ClearInterrupt();
@@ -539,12 +539,11 @@ void GTernal::moveR(int motorSpeed){
     motorSpeed = 255;
   }
 
-  // Removed as protection is added in control loop.
   // Back-emf protection for rapid direction changes
-  // if (motorSpeed*_motorSpeedR_old < 0){
-  //  noMotion();
-  //  delay(1);
-  // }
+  if (motorSpeed*_motorSpeedR_old < 0){
+    brake();
+    delay(1);
+  }
 
   // Move the motor.
   digitalWrite(_RMotor1, in1);
@@ -572,12 +571,11 @@ void GTernal::moveL(int motorSpeed){
     motorSpeed = 255;
   }
 
-  // Removed as protection is added in control loop.
   // Back-emf protection for rapid direction changes
-  //if (motorSpeed*_motorSpeedL_old < 0){
-  //  brake();
-  //  delay(1);
-  //}
+  if (motorSpeed*_motorSpeedL_old < 0){
+    brake();
+    delay(1);
+  }
 
   // Move the motor.
   digitalWrite(_LMotor1, in1);
@@ -628,8 +626,6 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
     _integralR = 0; 
     _oldErrorL = 0;
     _oldErrorR = 0;
-    _oldMotorL = 0;
-    _oldMotorR = 0;
   }
 
   float desLVel = desLVelInput;
@@ -763,28 +759,6 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
     // _satR = true;
     _motorR=-255;
   }
-
-  if (abs(_motorL - _oldMotorL) > _maxMotorInc){ // Check for command that requires high acceleration
-    if(_motorL - _oldMotorL > 0){
-      _motorL = _oldMotorL + _maxMotorInc;
-    }
-    else{
-      _motorL = _oldMotorL - _maxMotorInc;
-    }
-    
-  }
-
-  if (abs(_motorR - _oldMotorR) > _maxMotorInc){ // Check for command that requires high acceleration
-    if(_motorR - _oldMotorR > 0){
-      _motorR = _oldMotorR + _maxMotorInc;
-    }
-    else{
-      _motorR = _oldMotorR - _maxMotorInc;
-    }
-  }
-
-  _oldMotorR = _motorR;
-  _oldMotorL = _motorL;
 
   // _wheelSpeedL = _motorL;
   // _wheelSpeedR = _motorR;

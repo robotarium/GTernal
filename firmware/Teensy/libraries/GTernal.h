@@ -89,7 +89,7 @@ class GTernal
     static constexpr int _encoderCountsPerRotation = 28; // Encoder counts per single shaft rotation.
     static constexpr float _motorGearRatio = 100; // The gearing ratio of the drive motor being used.
     static constexpr float _wheelDiameter = 0.032; // Wheel Diameter in cm.
-    static constexpr float _axelLength = 0.11; // Axel length in cm.
+    static constexpr float _axelLength = 0.105; // Axel length in cm.
     static constexpr float _battVoltThreshold = 4000.0; // Threshold battery voltage (mV) for turning turning the RPi on when in fast charging mode
 
     ///////////////////////////////////////////////////////////
@@ -205,11 +205,6 @@ class GTernal
     int _motorL = 0;//Left Motor Speed (Arduino PWM Units, int 0-255)
     int _motorR = 0;//Right Motor Speed (Arduino PWM Units, int 0-255)
 
-    int _oldMotorL;//Old Left Motor Speed (Arduino PWM Units, int 0-255). Used to limit acceleration of motor to prevent voltage sag.
-    int _oldMotorR;//Old Right Motor Speed (Arduino PWM Units, int 0-255). Used to limit acceleration of motor to prevent voltage sag.
-
-    int _maxMotorInc = 50;//Maximum PWM increase in a time step (0.01).
-
     int _oldMotorPIDEncoderCountL;//Old Encoder Count storage for PIDMotorControl Function
     int _oldMotorPIDEncoderCountR;
 
@@ -287,7 +282,7 @@ class GTernal
     float _rad2deg(float rad); //Converts radians to degrees.
     float _wrapToPi(float rad); //Wraps a radian angle to (-pi,pi]
     float _wrapTo2Pi(float rad); //Wrap a radian angle to [0,2*pi)
-    uint32_t _wheel(uint8_t wheelPos); //Given a uint8_t will return an RGB color
+    uint32_t _wheel(byte wheelPos); //Given a byte will return an RGB color
 
 };
 
