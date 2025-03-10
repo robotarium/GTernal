@@ -13,7 +13,7 @@ export DOCKER_HUB_REPO_BASE=base
 # Local Docker Registry
 export LOCAL_DOCKER_REGISTRY=192.168.1.136:9000
 export LOCAL_FIRMWARE_NAME=firmware
-export LOCAL_FRIMWARE_BASE=base
+export LOCAL_FIRMWARE_BASE=base
 
 # MQTT HOST
 export MQTT_HOST=192.168.1.136

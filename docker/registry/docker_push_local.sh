@@ -1,5 +1,5 @@
 #!/bin/bash
 
 source ../config/env_variables.sh
-sudo docker tag gternal:firmware $LOCAL_DOCKER_REGISTRY/$LOCAL_FIRMWARE_NAME
-sudo docker push $LOCAL_DOCKER_REGISTRY/$LOCAL_FIRMWARE_NAME
+sudo docker tag gternal:firmware 0.0.0.0:9000/$LOCAL_FIRMWARE_NAME
+sudo docker push 0.0.0.0:9000/$LOCAL_FIRMWARE_NAME
