@@ -8,10 +8,10 @@ source ../config/env_variables.sh
 
 # Docker build command
 # Use the detect_serial module to get the correct serial port
-(cd ../; sudo docker buildx build --no-cache \
-                                  --tag gternal:firmware \
-                                  --build-arg FIRMWARE_REPO_USERNAME=$FIRMWARE_REPO_USERNAME \
-                                  --build-arg FIRMWARE_REPO_NAME=$FIRMWARE_REPO_NAME \
-                                  --build-arg FIRMWARE_REPO_BRANCH=$FIRMWARE_REPO_BRANCH \
-                                  --platform linux/arm64 \
-                                  -f docker/Dockerfile .)
+sudo docker buildx build --no-cache \
+                         --tag gternal:firmware \
+                         --build-arg FIRMWARE_REPO_USERNAME=$FIRMWARE_REPO_USERNAME \
+                         --build-arg FIRMWARE_REPO_NAME=$FIRMWARE_REPO_NAME \
+                         --build-arg FIRMWARE_REPO_BRANCH=$FIRMWARE_REPO_BRANCH \
+                         --platform linux/arm64 \
+                         .
