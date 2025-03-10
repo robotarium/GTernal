@@ -59,7 +59,7 @@ During the setup process, each robot runs an automatic setup script which clones
     cd <path-to-parent-directory>/GTernal/interfacing
     ./setup.sh setup_base_image
     ```
-    When prompted for password, enter the password of your computer. When prompted 'Enter secrets for robots,' enter the password for the Raspberry Pis, 'raspberry'
+    When prompted for password, enter the password of your computer. When prompted 'Enter secrets for robots,' enter the password for the Raspberry Pis, `raspberry`.
     This will automatically setup the SD card as the base image. Wait for 'DONE SETTING UP BASE IMAGE' message on the terminal.
 5. Shutdown the Pi by running
     ```
@@ -131,7 +131,7 @@ This section assumes that:
 ## 1 - Firmware Docker Image Setup
 The "docker_run.sh" script makes each robot pull the firmware image from either Docker Hub of a local Docker registry instead of building the firmware docker image directly on each robot. This saves a lot of time when building multiple robots. Also, with "v2tec/watchtower" image running on the robots, each robot downloads and runs the newest firmware image uploaded to the Docker Hub automatically. Therefore, it is unnecessary to manually update the firmware of each robot when a new firmware image is built and pushed to Docker Hub/local Docker registry.
 
-### 1 - Building the Firware Image
+### 1 - Building the Firmware Image
 
 1. Inspect and update the environment variables in `config/env_variables.sh`
 2. Run
