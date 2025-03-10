@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ../config/env_variables.sh
+source ../../config/env_variables.sh
 if [ -n "$LOCAL_DOCKER_REGISTRY" ]; then
 	sudo docker pull $LOCAL_DOCKER_REGISTRY/$LOCAL_FIRMWARE_BASE
 else
