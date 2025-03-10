@@ -2,7 +2,7 @@
 export FIRMWARE_REPO_USERNAME=robotarium
 export FIRMWARE_REPO_NAME=GTernal
 export FIRMWARE_REPO_URL=https://github.com/${FIRMWARE_REPO_USERNAME}/${FIRMWARE_REPO_NAME}
-export FIRMWARE_REPO_BRANCH=setup_test
+export FIRMWARE_REPO_BRANCH=main
 
 # Docker Hub Repository for the Firmware
 # This will not be used if LOCAL_DOCKER_REGISTRY is set
