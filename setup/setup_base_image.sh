@@ -59,7 +59,7 @@ print_end "$current_step"
 
 current_step="INSTALLING DOCKER"
 print_start "$current_step"
-for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove -y $pkg || true; done
+for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove -y $pkg /dev/null || true; done
 sudo apt-get update > /dev/null
 sudo apt-get install -y ca-certificates curl > /dev/null
 sudo install -m 0755 -d /etc/apt/keyrings
