@@ -8,10 +8,12 @@ export FIRMWARE_REPO_BRANCH=main
 # This will not be used if LOCAL_DOCKER_REGISTRY is set
 export DOCKER_HUB_REPO_USERNAME=skim743
 export DOCKER_HUB_REPO_NAME=firmware
+export DOCKER_HUB_REPO_BASE=base
 
 # Local Docker Registry
 export LOCAL_DOCKER_REGISTRY=192.168.1.8:9000
 export LOCAL_FIRMWARE_NAME=firmware
+export LOCAL_FRIMWARE_BASE=base
 
 # MQTT HOST
 export MQTT_HOST=192.168.1.8
