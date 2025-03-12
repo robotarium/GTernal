@@ -262,9 +262,7 @@ void GTernal::jsonSerialRead(){
       }  
     }
     if(Serial3.availableForWrite() >= jsonOut.size()+1){
-    // if(Serial.dtr()){
       jsonOut.printTo(Serial3);
-      // jsonOut.printTo(Serial);
       // jsonOut.printTo(Serial); // For debugging
       // Serial.println(jsonOut.size()); // For debugging
       _jsonBufferOut.clear();
@@ -572,13 +570,6 @@ void GTernal::moveL(int motorSpeed){
     motorSpeed = 255;
   }
 
-  // Removed as protection is added in control loop.
-  // Back-emf protection for rapid direction changes
-  //if (motorSpeed*_motorSpeedL_old < 0){
-  //  brake();
-  //  delay(1);
-  //}
-
   // Move the motor.
   digitalWrite(_LMotor1, in1);
   digitalWrite(_LMotor2, in2);
@@ -613,7 +604,7 @@ void GTernal::updateWheelSpeeds(){
 
 void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
   /*Keeps the rotational speeds of the individual motors at setpoints desLVel and desRVel (rad/s).*/
-  // _PIDMotorsTimeStart = 2;
+  // The control loop follows execute-sense-actuate sequence for consistent timing.
 
   moveL(_motorL);
   moveR(_motorR);
@@ -685,25 +676,6 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
   _wheelSpeedR = wheelSpeedR;
   _speedBufferCount++;
 
-  // // Error on individual motors for vel control
-  // float errorL = desLVel - 2.0 * _pi * (countL - _oldMotorPIDEncoderCountL) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
-  // float errorR = desRVel - 2.0 * _pi * (countR - _oldMotorPIDEncoderCountR) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
-  
-  // // Check and correct for rollover
-  // if (countL < 0 && _oldMotorPIDEncoderCountL > 0 && _oldMotorPIDEncoderCountL > 20000){
-  //   errorL = desLVel - 2.0 * _pi * ((countL - (-32768)) - (32767 - _oldMotorPIDEncoderCountL)) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
-  // }
-  // if (countL > 0 && _oldMotorPIDEncoderCountL < 0 && _oldMotorPIDEncoderCountL < -20000){
-  //   errorL = desLVel - 2.0 * _pi * ((32767 - countL) - (_oldMotorPIDEncoderCountL - (-32768))) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
-  // }
-
-  // if (countR < 0 && _oldMotorPIDEncoderCountR > 0 && _oldMotorPIDEncoderCountR > 20000){
-  //   errorR = desRVel - 2.0 * _pi * ((countR - (-32768)) - (32767 - _oldMotorPIDEncoderCountR)) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
-  // }
-  // if (countR > 0 && _oldMotorPIDEncoderCountR < 0 && _oldMotorPIDEncoderCountR < -20000){
-  //   errorR = desRVel - 2.0 * _pi * ((32767 - countR) - (_oldMotorPIDEncoderCountR - (-32768))) / (_encoderCountsPerRotation * _motorGearRatio * _PIDTimeStep);
-  // }
-
   float errorL = desLVel - speedL;
   float errorR = desRVel - speedR;
 
@@ -716,51 +688,24 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
   _oldMotorPIDEncoderCountL = countL;
   _oldMotorPIDEncoderCountR = countR;
 
-  // _wheelSpeedL = desLVel - errorL;
-  // _wheelSpeedR = desRVel - errorR;
-
-  //Get rid of integral windup with feedback loop.
-  // if(_satR){
-  //   _motorR += int(_motorDigitalK*(_kpMotor*errorR + _kiMotor*(_integralR + _satRVal*_PIDTimeStep) + _kdMotor*diffR));
-  //   _satR = false;
-  // }
-  // else{
-  //   _motorR += int(_motorDigitalK*(_kpMotor*errorR + _kiMotor*_integralR + _kdMotor*diffR));
-  // }
-
-  // if(_satL){
-  //   _motorL += int(_motorDigitalK*(_kpMotor*errorL + _kiMotor*(_integralL + _satLVal*_PIDTimeStep) + _kdMotor*diffL));
-  //   _satL = false;
-  // }
-  // else{
-  //   _motorL += int(_motorDigitalK*(_kpMotor*errorL + _kiMotor*_integralL + _kdMotor*diffL));
-  // }
   _motorR += int(_motorDigitalK*(_kpMotor*errorR + _kiMotor*_integralR + _kdMotor*diffR));
   _motorL += int(_motorDigitalK*(_kpMotor*errorL + _kiMotor*_integralL + _kdMotor*diffL));
   
   //Check and deal with motor saturation.
   if (_motorL>255){
     _integralL -= (errorL*_PIDTimeStep); //Don't integrate at saturation
-    // _satLVal = (255 - _motorL);
-    // _satL = true;
     _motorL=255;
   }
   if (_motorR>255){
     _integralR -= (errorR*_PIDTimeStep); // Don't integrate at saturation
-    // _satRVal = (255 - _motorR);
-    // _satR = true;
     _motorR=255;
   }
   if (_motorL<-255){
     _integralL -= (errorL*_PIDTimeStep); // Don't integrate at saturation
-    // _satLVal = (-255 - _motorL);
-    // _satL = true;
     _motorL=-255;
   }
   if (_motorR<-255){
     _integralR -= (errorR*_PIDTimeStep); // Don't integrate at saturation
-    // _satRVal = (-255 - _motorR);
-    // _satR = true;
     _motorR=-255;
   }
 
@@ -785,13 +730,6 @@ void GTernal::PIDMotorControl(float desLVelInput, float desRVelInput){
 
   _oldMotorR = _motorR;
   _oldMotorL = _motorL;
-
-  // _wheelSpeedL = _motorL;
-  // _wheelSpeedR = _motorR;
-
-  // _ISRElapsedTime = 2.0;
-  // moveL(_motorL);
-  // moveR(_motorR);
 
 }
 
