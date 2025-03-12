@@ -48,7 +48,7 @@ void GTernal::SETUP(){
   digitalWrite(_rpiEnable, LOW);
 
   // Initialize I2C bus.
-  // Wire.begin();
+  Wire.begin();
 
   ///////////////////////////////////////////////////////////
   // Neo Pixel Setup
@@ -60,11 +60,11 @@ void GTernal::SETUP(){
   ///////////////////////////////////////////////////////////
   // INA260 Setup
   ///////////////////////////////////////////////////////////
-  // if (!ina260.begin())
-  // {
-  //   Serial.print("Ooops, no INA260 detected ... Check your wiring or I2C ADDR!");
-  //   while (1);
-  // }
+  if (!ina260.begin())
+  {
+    Serial.print("Ooops, no INA260 detected ... Check your wiring or I2C ADDR!");
+    while (1);
+  }
 
   ///////////////////////////////////////////////////////////
   // VL53L4CD Setup
@@ -85,17 +85,17 @@ void GTernal::SETUP(){
   //   // Serial.println(int(x));
   // }
 
-  // ///////////////////////////////////////////////////////////
-  // // BNO055 Setup
-  // ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  // BNO055 Setup
+  ///////////////////////////////////////////////////////////
   // Initialize the sensor
-  // if (!bno.begin())
-  // {
-  //   /* There was a problem detecting the BNO055 ... check your connections */
-  //   Serial.println("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-  //   while (1);
-  // }
-  // Wire.endTransmission();
+  if (!bno.begin())
+  {
+    /* There was a problem detecting the BNO055 ... check your connections */
+    Serial.println("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    while (1);
+  }
+  Wire.endTransmission();
 
   ///////////////////////////////////////////////////////////
   //Start Timers for Control Loops
