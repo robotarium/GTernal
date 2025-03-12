@@ -30,6 +30,12 @@ print_end() {
 # git pull --rebase origin $FIRMWARE_REPO_BRANCH
 # print_end "$current_step"
 
+current_step="PULLING GTERNAL BASE IMAGE"
+print_start "$current_step"
+cd /home/pi/git/GTernal/docker/base_image
+sudo ./docker_pull.sh
+print_end "$current_step"
+
 current_step="STARTING FIRMWARE CONTAINER"
 print_start "$current_step"
 cd /home/pi/git/GTernal/docker

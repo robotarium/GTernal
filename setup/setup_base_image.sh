@@ -101,23 +101,17 @@ sudo -u pi git clone -b $FIRMWARE_REPO_BRANCH $FIRMWARE_REPO_URL
 sudo -u pi git clone https://github.com/robotarium/mac_discovery
 print_end "$current_step"
 
-current_step="PULLING GTERNAL BASE IMAGE"
-print_start "$current_step"
-cd /home/pi/git/GTernal/docker/base_image
-sudo ./docker_pull.sh
-print_end "$current_step"
-
 current_step="STARTING WATCHTOWER CONTAINER"
 print_start "$current_step"
 cd /home/pi/git/GTernal/docker
 sudo ./docker_watch.sh
 print_end "$current_step"
 
-current_step="STARTING MAC DISCOVERY CONTAINER"
-print_start "$current_step"
-cd /home/pi/git/mac_discovery/docker
-sudo ./docker_run.sh
-print_end "$current_step"
+# current_step="STARTING MAC DISCOVERY CONTAINER"
+# print_start "$current_step"
+# cd /home/pi/git/mac_discovery/docker
+# sudo ./docker_run.sh
+# print_end "$current_step"
 
 STR="REMOVING SETUP SCRIPTS"
 print_start "$STR"
