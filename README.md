@@ -102,7 +102,7 @@ During the setup process, each robot runs an automatic setup script which clones
 > You must enter the device name without any numbers. For example, if you see '/dev/sdb1' and '/dev/sdb2', the device name is `/dev/sdb`.
 8. Create the image of the SD card on your computer by running
     ```
-    sudo dd if=<name-of-the-sd-card> of=<desired-directory>/GTernal_base_image.img status=progress
+    sudo dd if=<name-of-the-sd-card> of=<desired-directory>/GTernal_base_image.img bs=4M status=progress
     ```
     e.g., `sudo dd if=/dev/sdb of=~/GTernal_base_image.img bs=4M status=progress`<br>
 9. Shrink the size of the base image by running
