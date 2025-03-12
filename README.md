@@ -16,7 +16,7 @@ During the setup process, each robot runs an automatic setup script which clones
 > The absolute path for the `Arduino/libraries` directory is OS dependent, and this can be found here: https://support.arduino.cc/hc/en-us/articles/4412950938514-Open-the-Sketchbook
     
 > [!NOTE]
-> The firmware for Teensy requires ArduinoJson 5.13 which is included in `GTernal/firmware/Teensy/libraries.`
+> The firmware for Teensy requires ArduinoJson 5.13 which is included in `GTernal/firmware/Teensy/libraries`.
 > ArduinoJson 6 is currently not compatible with the firmware.
 3. Connect a Teensy to the computer using a micro-USB cable.
 > [!NOTE]
@@ -78,20 +78,19 @@ During the setup process, each robot runs an automatic setup script which clones
          sudo reboot
         ```
     - Follow the instructions in Section 4 up to 4.1.2.<br>
-    Next, ssh into the robot.
-    ```
-    ssh pi@<ip-address-of-robot>
-    ```
-    Run
-    ```
-    cd <path-to-parent-directory>/GTernal/docker/base_image/
-    ./docker_pull.sh
-    ```
+    - Next, ssh into the robot.
+        ```
+        ssh pi@<ip-address-of-robot>
+        ```
+    - Run
+        ```
+        cd <path-to-parent-directory>/GTernal/docker/base_image/
+        ./docker_pull.sh
+        ```
 
-5. Shutdown the Pi by running
+5. On the ssh terminal, shutdown the Pi by running
     ```
-    cd <path-to-parent-directory>/GTernal/interfacing
-    ./shutdown_robots.sh 1 base_image
+    sudo reboot
     ```
 6. Remove the SD card from the Pi and insert it to your computer.
 7. On your computer, identify the name of the SD card by running
@@ -105,8 +104,7 @@ During the setup process, each robot runs an automatic setup script which clones
     ```
     sudo dd if=<name-of-the-sd-card> of=<desired-directory>/GTernal_base_image.img
     ```
-    e.g., `sudo dd if=/dev/sdb of=~/GTernal_base_image.img`<br>
-    This process takes a few minutes and does not provide any status messages.
+    e.g., `sudo dd if=/dev/sdb of=~/GTernal_base_image.img status=progress`<br>
 9. Shrink the size of the base image by running
     ```
     wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
@@ -139,9 +137,7 @@ During the setup process, each robot runs an automatic setup script which clones
     ```
     sudo dd if=<path-to-the-base-image>/GTernal_base_image.img of=<name-of-the-sd-card>
     ```
-    e.g., `sudo dd if=~/GTernal_base_image.img of=/dev/sdb`<br>
-    This process takes a few minutes and does not provide any status messages.
-
+    e.g., `sudo dd if=~/GTernal_base_image.img of=/dev/sdb status=progress`<br>
 5. Load as many SD cards as needed with the base image. More detailed instructions on cloning an SD card image can be found here: https://beebom.com/how-clone-raspberry-pi-sd-card-windows-linux-macos/
 
 
