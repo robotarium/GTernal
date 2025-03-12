@@ -84,11 +84,16 @@ def main():
     password = getpass.getpass()
 
     def progress_callback(robot_id, progress):
-        sys.stdout.write(f"\r\033[K[{robot_id}] {progress}")
+        status[robot_id] = progress
+        sys.stdout.write("\033c")  # Clear the terminal
+        for rid, stat in status.items():
+            sys.stdout.write(f"[{rid}] {stat}\n")
         sys.stdout.flush()
 
     def run_setup_command(robot_id, cmd):
         run_command_with_progress(robot_id, cmd, progress_callback)
+
+    status = {robot_id: "Starting..." for robot_id in id_to_ip.keys()}
 
     if args.command == 'ssh':
         cmds = [(robot_id, [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', args.c]]) for robot_id, ip in id_to_ip.items()]
@@ -101,34 +106,10 @@ def main():
         cmds = [(robot_id, [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../setup/setup_base_image.sh', f'pi@{ip}:/home/pi'],
                             ['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../config/env_variables.sh', f'pi@{ip}:/home/pi'],
                             ['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo ./setup_base_image.sh']]) for robot_id, ip in id_to_ip.items()]
-    # elif args.command == 'setup_from_base':
-    #     cmds = [(robot_id, [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../setup/setup_base_image', f'pi@{ip}:/home/pi'],
-    #                         ['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo /home/pi/git/GTernal/setup/setup_from_base']]) for robot_id, ip in id_to_ip.items()]
     elif args.command == 'setup_from_base':
         cmds = [(robot_id, [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo rm -f /home/pi/git/GTernal/config/mac_list.json'],
                             ['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../config/mac_list.json', f'pi@{ip}:/home/pi/git/GTernal/config'],
                             ['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo /home/pi/git/GTernal/setup/setup_from_base.sh']]) for robot_id, ip in id_to_ip.items()]
-
-    # pids = []
-    # for cmd in cmds:
-    #     pids.append(subprocess.Popen(cmd))
-    #     pids[-1].wait() # Needed to wait for the setup script to be copied
-
-    # for pid in pids:
-    #     pid.communicate()
-
-    # # For updating the mac_list.json and docker_run.sh files and restarting the Pi to apply all settings
-    # if args.command == 'setup':
-    #     cmds = []
-    #     cmds += [(robot_id, ['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../config/mac_list.json', f'pi@{ip}:/home/pi/git/GTernal/config']) for robot_id, ip in id_to_ip.items()]
-    #     cmds += [(robot_id, ['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../docker/docker_run.sh', f'pi@{ip}:/home/pi/git/GTernal/docker']) for robot_id, ip in id_to_ip.items()]
-    #     cmds += [(robot_id, ['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo reboot']) for robot_id, ip in id_to_ip.items()]
-
-    # elif args.command == 'setup_base_image':
-    #     cmds = []
-    #     cmds += [(robot_id, ['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../config/mac_list.json', f'pi@{ip}:/home/pi/git/GTernal/config']) for robot_id, ip in id_to_ip.items()]
-    #     cmds += [(robot_id, ['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../docker/docker_run_local.sh', f'pi@{ip}:/home/pi/git/GTernal/docker']) for robot_id, ip in id_to_ip.items()]
-    #     cmds += [(robot_id, ['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo reboot']) for robot_id, ip in id_to_ip.items()]
 
     threads = []
     for robot_id, cmd in cmds:
