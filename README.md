@@ -61,6 +61,33 @@ During the setup process, each robot runs an automatic setup script which clones
     ```
     When prompted for password, enter the password of your computer. When prompted 'Enter secrets for robots,' enter the password for the Raspberry Pis, `raspberry`.
     This will automatically setup the SD card as the base image. Wait for 'DONE SETTING UP BASE IMAGE' message on the terminal.
+5. In case of using another network for the robot for actual deployment, edit the wireless LAN credentials.
+    First, ssh into the robot.
+    ```
+    ssh pi@<ip-address-of-robot>
+    ```
+    Then, edit the wpa_supplicant.conf file to update the wireless LAN credentials.
+    ```
+    sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+    ```
+
+6. (Optional) Pull the base firmware image to reduce the setup time.
+    - If the wireless LAN credential has changed in the previous step, restart the Raspberry Pi.<br>
+        ```
+         ssh pi@<ip-address-of-robot>
+         sudo reboot
+        ```
+    - Follow the instructions in Section 4 up to 4.1.2.<br>
+    Next, ssh into the robot.
+    ```
+    ssh pi@<ip-address-of-robot>
+    ```
+    Run
+    ```
+    cd <path-to-parent-directory>/GTernal/docker/base_image/
+    ./docker_pull.sh
+    ```
+
 5. Shutdown the Pi by running
     ```
     cd <path-to-parent-directory>/GTernal/interfacing
@@ -131,15 +158,15 @@ This section assumes that:
 ## 1 - Firmware Docker Image Setup
 The "docker_run.sh" script makes each robot pull the firmware image from either Docker Hub of a local Docker registry instead of building the firmware docker image directly on each robot. This saves a lot of time when building multiple robots. Also, with "v2tec/watchtower" image running on the robots, each robot downloads and runs the newest firmware image uploaded to the Docker Hub automatically. Therefore, it is unnecessary to manually update the firmware of each robot when a new firmware image is built and pushed to Docker Hub/local Docker registry.
 
-### 1 - Building the Firmware Image
-
+### 1 - Build the Base Firmware Image
 1. Inspect and update the environment variables in `config/env_variables.sh`
-2. Run
+2. Build the base image
     ```
-    ./docker_build
+    cd <path-to-parent-directory>/GTernal/docker/base_image/
+    ./docker_build.sh
     ```
 
-### 2 - Tag the image and push it to a Docker registry
+### 2 - Tag the Base Image and Push it to a Docker Registry
 
 #### 2.1 - Docker Hub (Online)
 1. Log into the Docker Hub with
@@ -148,16 +175,42 @@ The "docker_run.sh" script makes each robot pull the firmware image from either 
     ```
 2. Run
     ```
+    cd <path-to-parent-directory>/GTernal/docker/base_image/
     ./docker_push.sh
     ```
 
 #### 2.2 - Local Docker registry (Local)
 1. Start a local Docker registry
     ```
+    cd <path-to-parent-directory>/GTernal/docker/
     ./docker_registry.sh
     ```
 2. Run
     ```
+    cd <path-to-parent-directory>/GTernal/docker/base_image/
+    ./docker_push_local.sh
+    ```
+
+### 3 - Build the Firmware Image
+1. Build the firmware image
+    ```
+    cd <path-to-parent-directory>/GTernal/docker/
+    ./docker_build.sh
+    ```
+
+### 4 - Tag the Firmware Image and Push it to a Docker Registry
+
+#### 4.1 - Docker Hub (Online)
+1. Run
+    ```
+    cd <path-to-parent-directory>/GTernal/docker/
+    ./docker_push.sh
+    ```
+
+#### 4.2 - Local Docker registry (Local)
+1. Run
+    ```
+    cd <path-to-parent-directory>/GTernal/docker/
     ./docker_push_local.sh
     ```
 
