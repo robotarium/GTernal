@@ -11,7 +11,7 @@ During the setup process, each robot runs an automatic setup script which clones
 
 # 2 - Program Teensy
 1. Install Teensyduino (https://www.pjrc.com/teensy/td_download.html)
-2. Copy and paste all library folders in `GTernal/firmware/Teensy/libraries` to `Arduino/libraries`
+2. Copy and paste all library folders in `GTernal/firmware/Teensy/libraries` to `Arduino/libraries`.
 > [!NOTE]
 > The absolute path for the `Arduino/libraries` directory is OS dependent, and this can be found here: https://support.arduino.cc/hc/en-us/articles/4412950938514-Open-the-Sketchbook
     
@@ -29,7 +29,7 @@ During the setup process, each robot runs an automatic setup script which clones
 ## 1 - Install Raspberry Pi OS on an SD Card
 1. Install and run the Raspberry Pi Imager (https://www.raspberrypi.com/software/). The instuction is for Raspberry Pi Imager v.1.8.5
 2. For 'Raspberry Pi Device,' select the version of the Pi used.
-3. For 'Operating System,' select `Raspberry Pi OS (other)` and select `Raspberry Pi OS (Legacy, 64-bit) Lite.` For Raspberry Pi Zero 1s, select `Raspberry Pi OS (Legacy, 32-bit) Lite`
+3. For 'Operating System,' select `Raspberry Pi OS (other)` and select `Raspberry Pi OS (Legacy, 64-bit) Lite`. For Raspberry Pi Zero 1s, select `Raspberry Pi OS (Legacy, 32-bit) Lite`
 4. For 'Storage,' choose the micro-SD card to be used.
 5. Click 'NEXT' and 'EDIT SETTINGS.'
 6. Under 'GENERAL' tab, check 'Set username and password' and type `pi` for the 'Username' and `raspberry` for 'Password.'
@@ -102,7 +102,7 @@ During the setup process, each robot runs an automatic setup script which clones
 > You must enter the device name without any numbers. For example, if you see '/dev/sdb1' and '/dev/sdb2', the device name is `/dev/sdb`.
 8. Create the image of the SD card on your computer by running
     ```
-    sudo dd if=<name-of-the-sd-card> of=<desired-directory>/GTernal_base_image.img
+    sudo dd if=<name-of-the-sd-card> of=<desired-directory>/GTernal_base_image.img status=progress
     ```
     e.g., `sudo dd if=/dev/sdb of=~/GTernal_base_image.img status=progress`<br>
 9. Shrink the size of the base image by running
@@ -135,7 +135,7 @@ During the setup process, each robot runs an automatic setup script which clones
     to unmount all listed partitions of the device.
 4. Load the SD card with the base image by running
     ```
-    sudo dd if=<path-to-the-base-image>/GTernal_base_image.img of=<name-of-the-sd-card>
+    sudo dd if=<path-to-the-base-image>/GTernal_base_image.img of=<name-of-the-sd-card> status=progress
     ```
     e.g., `sudo dd if=~/GTernal_base_image.img of=/dev/sdb status=progress`<br>
 5. Load as many SD cards as needed with the base image. More detailed instructions on cloning an SD card image can be found here: https://beebom.com/how-clone-raspberry-pi-sd-card-windows-linux-macos/
