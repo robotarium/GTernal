@@ -29,7 +29,7 @@ During the setup process, each robot runs an automatic setup script which clones
 ## 1 - Install Raspberry Pi OS on an SD Card
 1. Install and run the Raspberry Pi Imager (https://www.raspberrypi.com/software/). The instuction is for Raspberry Pi Imager v.1.8.5
 2. For 'Raspberry Pi Device,' select the version of the Pi used.
-3. For 'Operating System,' select `Raspberry Pi OS (other)` and select `Raspberry Pi OS (Legacy, 64-bit) Lite`. For Raspberry Pi Zero 1s, select `Raspberry Pi OS (Legacy, 32-bit) Lite`
+3. For 'Operating System,' select `Raspberry Pi OS (other)` and select `Raspberry Pi OS (Legacy, 64-bit) Lite`. For Raspberry Pi Zero 1s, select `Raspberry Pi OS (Legacy, 32-bit) Lite`.
 4. For 'Storage,' choose the micro-SD card to be used.
 5. Click 'NEXT' and 'EDIT SETTINGS.'
 6. Under 'GENERAL' tab, check 'Set username and password' and type `pi` for the 'Username' and `raspberry` for 'Password.'
@@ -104,7 +104,7 @@ During the setup process, each robot runs an automatic setup script which clones
     ```
     sudo dd if=<name-of-the-sd-card> of=<desired-directory>/GTernal_base_image.img status=progress
     ```
-    e.g., `sudo dd if=/dev/sdb of=~/GTernal_base_image.img status=progress`<br>
+    e.g., `sudo dd if=/dev/sdb of=~/GTernal_base_image.img bs=4M status=progress`<br>
 9. Shrink the size of the base image by running
     ```
     wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
@@ -137,7 +137,7 @@ During the setup process, each robot runs an automatic setup script which clones
     ```
     sudo dd if=<path-to-the-base-image>/GTernal_base_image.img of=<name-of-the-sd-card> status=progress
     ```
-    e.g., `sudo dd if=~/GTernal_base_image.img of=/dev/sdb status=progress`<br>
+    e.g., `sudo dd if=~/GTernal_base_image.img of=/dev/sdb bs=4M status=progress`<br>
 5. Load as many SD cards as needed with the base image. More detailed instructions on cloning an SD card image can be found here: https://beebom.com/how-clone-raspberry-pi-sd-card-windows-linux-macos/
 
 
@@ -392,12 +392,12 @@ cd <path_to_mac_discovery_repo>/docker
     ```
     python3 -m vizier.vizier --host <ip-address-of-MQTT-host> --get <robot#>/status
     ```
-    e.g., `python3 -m vizier.vizier --host 192.168.1.8 1884 --get 21/status`
+    e.g., `python3 -m vizier.vizier --host 192.168.1.8 --get 21/status`
 
 6. Send a motor command to a robot with
     ```
     python3 -m vizier.vizier --host <ip-address-of-MQTT-host> --publish matlab_api/<robot#> '{"v":1.0,"w":0.0}'
     ```
-    e.g., `python3 -m vizier.vizier --host 192.168.1.8 1884 --publish matlab_api/21 '{"v":1.0,"w":0.0}'`
+    e.g., `python3 -m vizier.vizier --host 192.168.1.8 --publish matlab_api/21 '{"v":1.0,"w":0.0}'`
 
     "v" and "w" are the desired linear and angular velocity of the robot, respectively. With this command, the robot will stop after 1 second for safety purposes.
