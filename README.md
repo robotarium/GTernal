@@ -138,6 +138,8 @@ During the setup process, each robot runs an automatic setup script which clones
     sudo dd if=<path-to-the-base-image>/GTernal_base_image.img of=<name-of-the-sd-card> status=progress
     ```
     e.g., `sudo dd if=~/GTernal_base_image.img of=/dev/sdb bs=4M status=progress`<br>
+> [!NOTE]
+> The status message may stop updating at some point. Please continue waiting for the write process to finish.
 5. Load as many SD cards as needed with the base image. More detailed instructions on cloning an SD card image can be found here: https://beebom.com/how-clone-raspberry-pi-sd-card-windows-linux-macos/
 
 
