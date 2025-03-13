@@ -46,7 +46,7 @@ def get_status_color(status):
 
 def run_command_with_progress(robot_id, cmds, progress_callback):
     for cmd in cmds:
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
         while True:
             output = process.stdout.readline()
             if output == '' and process.poll() is not None:
@@ -105,13 +105,12 @@ def main():
             mac_to_ip[mac] = ip
 
         # Make ID to IP mapping
+        id_to_ip = {mac_to_id[x]: y for x, y in mac_to_ip.items() if x in mac_to_id}
         if args.command == 'setup_base_image':
             id_to_ip = {mac_to_id[x]: y for x, y in mac_to_ip.items() if x in mac_to_id and mac_to_id[x] == "base_image"}
         elif args.id is not None:
             robot_ids = args.id.split(',')
             id_to_ip = {robot_id: ip for robot_id, ip in id_to_ip.items() if robot_id in robot_ids}
-        else:
-            id_to_ip = {mac_to_id[x]: y for x, y in mac_to_ip.items() if x in mac_to_id}
         
         # Construct the header based on the command
         if args.command == 'discover':
@@ -204,20 +203,22 @@ def main():
         status = {robot_id: "Starting..." for robot_id in id_to_ip.keys()}
 
         if args.command == 'ssh':
-            cmds = [(robot_id, [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', args.c]]) for robot_id, ip in id_to_ip.items()]
+            cmds = [(robot_id, [f"sshpass -p {password} ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no pi@{ip} {args.c}"]) for robot_id, ip in id_to_ip.items()]
         elif args.command == 'scp':
-            cmds = [(robot_id, [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', args.f, f'pi@{ip}:{args.d}']]) for robot_id, ip in id_to_ip.items()]
+            cmds = [(robot_id, [f"sshpass -p {password} scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no {args.f} pi@{ip}:{args.d}"]) for robot_id, ip in id_to_ip.items()]
         elif args.command == 'setup':
-            cmds = [(robot_id, [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../setup/setup', f'pi@{ip}:/home/pi'],
-                                ['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo ./setup']]) for robot_id, ip in id_to_ip.items()]
+            cmds = [(robot_id, [f"sshpass -p {password} scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../setup/setup pi@{ip}:/home/pi",
+                                f"sshpass -p {password} ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no pi@{ip} sudo ./setup"]) for robot_id, ip in id_to_ip.items()]
         elif args.command == 'setup_base_image':
-            cmds = [(robot_id, [['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../setup/setup_base_image.sh', f'pi@{ip}:/home/pi'],
-                                ['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../config/env_variables.sh', f'pi@{ip}:/home/pi'],
-                                ['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo ./setup_base_image.sh']]) for robot_id, ip in id_to_ip.items()]
+            cmds = [(robot_id, [f"sshpass -p {password} scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../setup/setup_base_image.sh pi@{ip}:/home/pi",
+                                f"sshpass -p {password} scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../config/env_variables.sh pi@{ip}:/home/pi",
+                                f"sshpass -p {password} ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no pi@{ip} sudo ./setup_base_image.sh"]) for robot_id, ip in id_to_ip.items()]
         elif args.command == 'setup_from_base':
-            cmds = [(robot_id, [['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo rm -f /home/pi/git/GTernal/config/mac_list.json'],
-                                ['sshpass', '-p', password, 'scp', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', '../config/mac_list.json', f'pi@{ip}:/home/pi/git/GTernal/config'],
-                                ['sshpass', '-p', password, 'ssh', '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no', f'pi@{ip}', 'sudo /home/pi/git/GTernal/setup/setup_from_base.sh']]) for robot_id, ip in id_to_ip.items()]
+            cmds = [(robot_id, [f"sshpass -p {password} ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no pi@{ip} sudo rm -f /home/pi/git/GTernal/config/mac_list.json",
+                                f"sshpass -p {password} scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../config/mac_list.json pi@{ip}:/home/pi/git/GTernal/config",
+                                f"sshpass -p {password} ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no pi@{ip} sudo /home/pi/git/GTernal/setup/setup_from_base.sh"]) for robot_id, ip in id_to_ip.items()]
+        elif args.command == 'restart_docker':
+            cmds = [(robot_id, [f"sshpass -p {password} ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no pi@{ip} docker restart firmware watchtower"]) for robot_id, ip in id_to_ip.items()]
 
         threads = []
         for robot_id, cmd in cmds:
