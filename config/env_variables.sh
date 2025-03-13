@@ -18,3 +18,6 @@ export LOCAL_FIRMWARE_BASE=base
 # MQTT HOST
 export MQTT_HOST=192.168.1.8
 export MQTT_PORT=1884
+
+# Starting IP Addresses for Network Device Selection
+export STARTING_IP_ADDRESSES="192.|10."
